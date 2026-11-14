@@ -7,16 +7,13 @@ type PacketHandler = (packet: NetworkPacket) => void;
 // High-Performance STUN & TURN Relay Infrastructure for Global NAT/Firewall Traversal
 const PEER_CONFIG = {
   debug: 1,
+  pingInterval: 5000,
   config: {
     iceServers: [
-      // Google Fast STUN
+      // Standard Google STUN
       { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' },
-      { urls: 'stun:stun2.l.google.com:19302' },
-      { urls: 'stun:stun3.l.google.com:19302' },
-      { urls: 'stun:stun4.l.google.com:19302' },
       { urls: 'stun:stun.cloudflare.com:3478' },
-      // Open Relay Project (Metered) Public STUN & TURN Relay Servers
+      // Open Relay Project (Metered) Public STUN & TURN Relay Servers (Port 80 and 443 TCP & UDP for Symmetric NAT traversal)
       { urls: 'stun:openrelay.metered.ca:80' },
       {
         urls: 'turn:openrelay.metered.ca:80',
@@ -39,7 +36,6 @@ const PEER_CONFIG = {
         credential: 'openrelayproject',
       },
     ],
-    iceCandidatePoolSize: 10,
   },
 };
 
@@ -49,7 +45,6 @@ class MultiplayerService {
   private hostConnection: DataConnection | null = null;
   private packetHandlers: Set<PacketHandler> = new Set();
   private localChannel: BroadcastChannel | null = null;
-  private keepAliveInterval: any = null;
   
   public isHost: boolean = false;
   public roomCode: string = '';
@@ -85,26 +80,6 @@ class MultiplayerService {
     }
     const rand = Math.random().toString(36).substring(2, 7);
     return `bytecore-mission-${cleanCode}-client-${rand}`;
-  }
-
-  private startKeepAlive() {
-    this.stopKeepAlive();
-    this.keepAliveInterval = setInterval(() => {
-      if (this.peer && !this.peer.destroyed && (this.peer as any).socket) {
-        try {
-          (this.peer as any).socket._send({ type: 'PING' });
-        } catch (e) {
-          // ignore
-        }
-      }
-    }, 15000);
-  }
-
-  private stopKeepAlive() {
-    if (this.keepAliveInterval) {
-      clearInterval(this.keepAliveInterval);
-      this.keepAliveInterval = null;
-    }
   }
 
   private setupLocalChannel() {
@@ -169,7 +144,7 @@ class MultiplayerService {
           this.disconnect();
           reject(new Error('Sinyal sunucusuna bağlanılamadı (Zaman aşımı). Lütfen internet bağlantınızı kontrol edin.'));
         }
-      }, 20000);
+      }, 25000);
 
       try {
         this.peer = new Peer(hostId, PEER_CONFIG);
@@ -180,14 +155,19 @@ class MultiplayerService {
           clearTimeout(timeoutId);
           this.isConnected = true;
           this.myPeerId = id;
-          this.startKeepAlive();
           resolve(id);
         });
 
         this.peer.on('disconnected', () => {
           console.warn('PeerJS Host disconnected from cloud signal, attempting reconnect...');
           if (this.peer && !this.peer.destroyed) {
-            this.peer.reconnect();
+            try {
+              (this.peer as any)._id = hostId;
+              (this.peer as any).id = hostId;
+              this.peer.reconnect();
+            } catch (e) {
+              console.warn('Host reconnect error:', e);
+            }
           }
         });
 
@@ -266,68 +246,58 @@ class MultiplayerService {
           this.disconnect();
           reject(new Error(`Kaptana bağlanılamadı (${this.roomCode}). Kaptanın odayı kurduğundan ve kodun doğru olduğundan emin olun.`));
         }
-      }, 20000);
+      }, 25000);
 
       try {
         this.peer = new Peer(clientId, PEER_CONFIG);
 
         this.peer.on('open', () => {
           this.isConnected = true;
-          this.startKeepAlive();
           
-          const attemptConnect = (retriesLeft = 3) => {
-            if (hasResolved || !this.peer || this.peer.destroyed) return;
+          if (hasResolved || !this.peer || this.peer.destroyed) return;
 
-            const conn = this.peer.connect(hostId);
-            this.hostConnection = conn;
+          const conn = this.peer.connect(hostId, {
+            reliable: true,
+          });
+          this.hostConnection = conn;
 
-            conn.on('open', () => {
-              if (hasResolved) return;
-              hasResolved = true;
-              clearTimeout(timeoutId);
-              this.setupConnection(conn);
+          conn.on('open', () => {
+            if (hasResolved) return;
+            hasResolved = true;
+            clearTimeout(timeoutId);
+            this.setupConnection(conn);
 
-              const joinPacket = {
-                type: 'PLAYER_JOIN' as const,
-                player: {
-                  ...clientPlayer,
-                  peerId: clientId,
-                },
-              };
+            const joinPacket = {
+              type: 'PLAYER_JOIN' as const,
+              player: {
+                ...clientPlayer,
+                peerId: clientId,
+              },
+            };
 
+            this.sendPacket(joinPacket);
+            setTimeout(() => {
               this.sendPacket(joinPacket);
-              setTimeout(() => {
-                this.sendPacket(joinPacket);
-              }, 300);
+            }, 300);
 
-              resolve();
-            });
+            resolve();
+          });
 
-            conn.on('error', (err) => {
-              console.warn('Connection to Host error:', err);
-              if (retriesLeft > 0 && !hasResolved) {
-                setTimeout(() => attemptConnect(retriesLeft - 1), 1200);
-              } else if (!hasResolved) {
-                hasResolved = true;
-                clearTimeout(timeoutId);
-                reject(err);
-              }
-            });
-
-            conn.on('close', () => {
-              if (!hasResolved && retriesLeft > 0) {
-                setTimeout(() => attemptConnect(retriesLeft - 1), 1200);
-              }
-            });
-          };
-
-          attemptConnect(3);
+          conn.on('error', (err) => {
+            console.warn('Connection to Host error:', err);
+          });
         });
 
         this.peer.on('disconnected', () => {
           console.warn('PeerJS Client disconnected, attempting reconnect...');
           if (this.peer && !this.peer.destroyed) {
-            this.peer.reconnect();
+            try {
+              (this.peer as any)._id = clientId;
+              (this.peer as any).id = clientId;
+              this.peer.reconnect();
+            } catch (e) {
+              console.warn('Client reconnect error:', e);
+            }
           }
         });
 
@@ -424,11 +394,20 @@ class MultiplayerService {
   public broadcastPacket(packet: NetworkPacket, excludePeerId?: string) {
     this.sendLocalPacket(packet);
     this.connections.forEach((conn, peerId) => {
-      if (peerId !== excludePeerId && conn.open) {
-        try {
-          conn.send(packet);
-        } catch (e) {
-          console.warn('Failed to send packet to peer', peerId, e);
+      if (peerId !== excludePeerId) {
+        if (conn.open) {
+          try {
+            conn.send(packet);
+          } catch (e) {
+            console.warn('Failed to send packet to peer', peerId, e);
+          }
+        } else {
+          // If connection is opening, deliver upon open
+          conn.on('open', () => {
+            try {
+              conn.send(packet);
+            } catch (e) {}
+          });
         }
       }
     });
@@ -440,10 +419,14 @@ class MultiplayerService {
       this.broadcastPacket(packet);
     } else if (this.hostConnection) {
       if (this.hostConnection.open) {
-        this.hostConnection.send(packet);
+        try {
+          this.hostConnection.send(packet);
+        } catch (e) {}
       } else {
         const onOpen = () => {
-          this.hostConnection?.send(packet);
+          try {
+            this.hostConnection?.send(packet);
+          } catch (e) {}
         };
         this.hostConnection.on('open', onOpen);
       }
@@ -462,7 +445,6 @@ class MultiplayerService {
   }
 
   public disconnect() {
-    this.stopKeepAlive();
     if (this.localChannel) {
       try {
         this.localChannel.close();
