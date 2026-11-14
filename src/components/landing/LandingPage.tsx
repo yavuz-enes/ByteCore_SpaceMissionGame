@@ -23,6 +23,7 @@ import {
   X,
   Sparkles,
   LogOut,
+  AlertTriangle,
 } from 'lucide-react';
 import { useMissionStore } from '../../store/missionStore';
 import { useSiteContent } from '../../hooks/useSiteContent';
@@ -48,6 +49,7 @@ export const LandingPage: React.FC = () => {
     players,
     myPlayerInfo,
     isConnecting,
+    connectionError,
     createRoom,
     joinRoom,
     leaveRoom,
@@ -68,11 +70,12 @@ export const LandingPage: React.FC = () => {
   const { content } = useSiteContent();
   const isTr = locale === 'tr';
 
-  // Local state for lobby form
-  const [lobbyMode, setLobbyMode] = useState<'host' | 'join'>('host');
-  const [playerNameInput, setPlayerNameInput] = useState('');
-  const [roomCodeInput, setRoomCodeInput] = useState('');
-  const [selectedRole, setSelectedRole] = useState<PlayerRole>('commander');
+  // Separate state for Host and Join to prevent input collision and shared loading states
+  const [hostPlayerName, setHostPlayerName] = useState('');
+  const [hostRoomCode, setHostRoomCode] = useState('');
+  const [joinPlayerName, setJoinPlayerName] = useState('');
+  const [joinRoomCode, setJoinRoomCode] = useState('');
+  const [connectingAction, setConnectingAction] = useState<'host' | 'join' | null>(null);
   const [copied, setCopied] = useState(false);
 
   // Handle Copy Code
@@ -85,14 +88,24 @@ export const LandingPage: React.FC = () => {
 
   // Handle Host Create (Station is selected inside the room)
   const handleHostCreate = async () => {
-    const code = (roomCodeInput || Math.random().toString(36).substring(2, 8)).toUpperCase();
-    await createRoom(code, playerNameInput || (isTr ? 'Kaptan' : 'Flight Commander'), 'commander');
+    setConnectingAction('host');
+    const code = (hostRoomCode || Math.random().toString(36).substring(2, 8)).toUpperCase();
+    try {
+      await createRoom(code, hostPlayerName || (isTr ? 'Kaptan' : 'Flight Commander'), 'commander');
+    } finally {
+      setConnectingAction(null);
+    }
   };
 
   // Handle Join Room (Station is selected inside the room)
   const handleJoinSubmit = async () => {
-    if (!roomCodeInput.trim()) return;
-    await joinRoom(roomCodeInput.trim().toUpperCase(), playerNameInput || (isTr ? 'Mürettebat' : 'Crew Member'), 'engineer');
+    if (!joinRoomCode.trim()) return;
+    setConnectingAction('join');
+    try {
+      await joinRoom(joinRoomCode.trim().toUpperCase(), joinPlayerName || (isTr ? 'Mürettebat' : 'Crew Member'), 'engineer');
+    } finally {
+      setConnectingAction(null);
+    }
   };
 
   // Multi-destination campaign toggling & removal (Only commander can modify in multiplayer)
@@ -470,6 +483,24 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Connection Error Banner */}
+            {connectionError && (
+              <div className="p-4 rounded-xl border border-rose-500/40 bg-rose-500/10 text-rose-300 text-xs font-mono flex items-start justify-between gap-3 animate-pulse">
+                <div className="flex items-start space-x-2.5">
+                  <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="block text-rose-200 mb-0.5">{isTr ? 'Bağlantı Uyarısı' : 'Connection Alert'}</strong>
+                    <span>{connectionError}</span>
+                    <p className="text-slate-400 text-[11px] mt-1">
+                      {isTr
+                        ? 'İpucu: Bir odaya katılabilmek için önce bir oyuncunun "Oda Oluştur" butonuna basarak odayı açmış olması gerekir.'
+                        : 'Tip: To join a room, another player must first create and host the room online.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {!isMultiplayer ? (
               /* Create or Join Controls */
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 divide-y md:divide-y-0 md:divide-x divide-slate-800">
@@ -487,8 +518,8 @@ export const LandingPage: React.FC = () => {
                       </label>
                       <input
                         type="text"
-                        value={playerNameInput}
-                        onChange={(e) => setPlayerNameInput(e.target.value)}
+                        value={hostPlayerName}
+                        onChange={(e) => setHostPlayerName(e.target.value)}
                         placeholder={isTr ? 'Örn: Kaptan Alex' : 'e.g., Flight Lead Alex'}
                         className="w-full bg-[#0B0F17] border border-slate-700/80 rounded-full px-4 py-2 text-xs text-white focus:outline-none focus:border-sky-400"
                       />
@@ -501,8 +532,8 @@ export const LandingPage: React.FC = () => {
                       <input
                         type="text"
                         maxLength={8}
-                        value={roomCodeInput}
-                        onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
+                        value={hostRoomCode}
+                        onChange={(e) => setHostRoomCode(e.target.value.toUpperCase())}
                         placeholder={isTr ? 'Boş bırakılırsa otomatik üretilir' : 'Auto-generated if blank'}
                         className="w-full bg-[#0B0F17] border border-slate-700/80 rounded-full px-4 py-2 text-xs text-white uppercase focus:outline-none focus:border-sky-400"
                       />
@@ -515,8 +546,13 @@ export const LandingPage: React.FC = () => {
                       onClick={handleHostCreate}
                       className="w-full py-2.5 rounded-full bg-white text-slate-950 font-semibold text-xs hover:bg-slate-100 transition-all disabled:opacity-50 cursor-pointer shadow-sm"
                     >
-                      {isConnecting ? (isTr ? 'Oda Kuruluyor...' : 'Establishing Room...') : (isTr ? 'Odayı Kur' : 'Create Room')}
+                      {isConnecting && connectingAction === 'host'
+                        ? (isTr ? 'Oda Kuruluyor...' : 'Establishing Room...')
+                        : (isTr ? 'Odayı Kur' : 'Create Room')}
                     </button>
+                    <p className="text-[11px] font-mono text-slate-500 text-center mt-1.5">
+                      {isTr ? 'Odayı kurduktan sonra oda kodunu arkadaşınızla paylaşın.' : 'Share the room code with your teammate once created.'}
+                    </p>
                   </div>
                 </div>
 
@@ -535,8 +571,8 @@ export const LandingPage: React.FC = () => {
                       <input
                         type="text"
                         maxLength={8}
-                        value={roomCodeInput}
-                        onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
+                        value={joinRoomCode}
+                        onChange={(e) => setJoinRoomCode(e.target.value.toUpperCase())}
                         placeholder={isTr ? 'Örn: ARTMIS' : 'e.g., ARTMIS'}
                         className="w-full bg-[#0B0F17] border border-slate-700/80 rounded-full px-4 py-2 text-sm text-white uppercase font-bold tracking-widest focus:outline-none focus:border-sky-400"
                       />
@@ -548,8 +584,8 @@ export const LandingPage: React.FC = () => {
                       </label>
                       <input
                         type="text"
-                        value={playerNameInput}
-                        onChange={(e) => setPlayerNameInput(e.target.value)}
+                        value={joinPlayerName}
+                        onChange={(e) => setJoinPlayerName(e.target.value)}
                         placeholder={isTr ? 'Örn: Mühendis Elena' : 'e.g., Engineer Elena'}
                         className="w-full bg-[#0B0F17] border border-slate-700/80 rounded-full px-4 py-2 text-xs text-white focus:outline-none focus:border-sky-400"
                       />
@@ -558,12 +594,17 @@ export const LandingPage: React.FC = () => {
 
                   <div className="pt-2">
                     <button
-                      disabled={isConnecting || !roomCodeInput.trim()}
+                      disabled={isConnecting || !joinRoomCode.trim()}
                       onClick={handleJoinSubmit}
                       className="w-full py-2.5 rounded-full bg-white text-slate-950 font-semibold text-xs hover:bg-slate-100 transition-all disabled:opacity-50 cursor-pointer shadow-sm"
                     >
-                      {isConnecting ? (isTr ? 'Bağlanılıyor...' : 'Connecting...') : (isTr ? 'Odaya Bağlan' : 'Connect to Crew')}
+                      {isConnecting && connectingAction === 'join'
+                        ? (isTr ? 'Bağlanılıyor...' : 'Connecting...')
+                        : (isTr ? 'Odaya Bağlan' : 'Connect to Crew')}
                     </button>
+                    <p className="text-[11px] font-mono text-slate-500 text-center mt-1.5">
+                      {isTr ? 'Kaptanın kurduğu oda kodunu girerek katılın.' : 'Enter the code of an already online host room.'}
+                    </p>
                   </div>
                 </div>
               </div>
