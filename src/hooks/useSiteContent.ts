@@ -380,7 +380,7 @@ export const useSiteContent = () => {
 
     const loadContent = async () => {
       try {
-        const res = await fetch('/data/site-content.json');
+        const res = await fetch('./data/site-content.json');
         if (res.ok) {
           const json = await res.json();
           if (isMounted && json && json.en && json.tr) {
