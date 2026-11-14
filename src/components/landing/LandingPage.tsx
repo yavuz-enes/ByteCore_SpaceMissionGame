@@ -29,10 +29,10 @@ import { useSiteContent } from '../../hooks/useSiteContent';
 import { MissionId, PlayerRole } from '../../types/mission';
 
 const DESTINATION_ARTWORK: Record<string, string> = {
-  'lunar-recon': '/flight-kit/card-moon-shackleton.webp',
-  'mars-recon': '/flight-kit/card-mars-valles.webp',
-  'europa-recon': '/flight-kit/card-europa-ice.webp',
-  'asteroid-scout': '/flight-kit/card-asteroid-psyche.webp',
+  'lunar-recon': './flight-kit/card-moon-shackleton.webp',
+  'mars-recon': './flight-kit/card-mars-valles.webp',
+  'europa-recon': './flight-kit/card-europa-ice.webp',
+  'asteroid-scout': './flight-kit/card-asteroid-psyche.webp',
 };
 
 export const LandingPage: React.FC = () => {
@@ -122,18 +122,18 @@ export const LandingPage: React.FC = () => {
       {/* Global Ambient Deep Space Atmosphere & Cockpit Layers (strictly behind content) */}
       <div
         className="fixed inset-0 pointer-events-none -z-20 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url('/flight-kit/bg-hero-deepspace.webp')` }}
+        style={{ backgroundImage: `url('./flight-kit/bg-hero-deepspace.webp')` }}
       />
       <div
         className="fixed inset-0 pointer-events-none -z-10 bg-[#0B0F17]/25"
       />
       <div
         className="fixed inset-0 pointer-events-none -z-10 opacity-15"
-        style={{ backgroundImage: `url('/flight-kit/orbital-grid-pattern.svg')`, backgroundSize: '320px' }}
+        style={{ backgroundImage: `url('./flight-kit/orbital-grid-pattern.svg')`, backgroundSize: '320px' }}
       />
       <div
         className="fixed inset-0 pointer-events-none -z-10 bg-cover bg-center opacity-20 mix-blend-screen"
-        style={{ backgroundImage: `url('/flight-kit/bg-cockpit-overlay.png')` }}
+        style={{ backgroundImage: `url('./flight-kit/bg-cockpit-overlay.png')` }}
       />
       {/* ------------------------------------------------------------------------- */}
       {/* 1. TOP GLOBAL NAVIGATION BAR */}
@@ -356,7 +356,7 @@ export const LandingPage: React.FC = () => {
                       {/* Destination Artwork Banner */}
                       <div className="relative w-full h-28 sm:h-32 rounded-xl overflow-hidden border border-white/10 group-hover:border-sky-400/40 transition-colors bg-[#080C14]">
                         <img
-                          src={DESTINATION_ARTWORK[dest.id] || '/flight-kit/card-moon-shackleton.webp'}
+                          src={DESTINATION_ARTWORK[dest.id] || './flight-kit/card-moon-shackleton.webp'}
                           alt={dest.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           loading="lazy"
@@ -851,31 +851,31 @@ export const LandingPage: React.FC = () => {
                 id: 'delta-v',
                 title: isTr ? 'Delta-V & İtki' : 'Delta-V & Thrust',
                 desc: isTr ? 'Tsiolkovsky roket denklemi ve Hohmann geçişi' : 'Tsiolkovsky equation & Hohmann transfers',
-                img: '/flight-kit/module-delta-v.webp',
+                img: './flight-kit/module-delta-v.webp',
               },
               {
                 id: 'solar',
                 title: isTr ? 'Güneş Akısı & Isı' : 'Solar Flux & Thermal',
                 desc: isTr ? 'Ters kare kanunu (1/r²) ve güç panelleri' : 'Inverse-square irradiance & power margins',
-                img: '/flight-kit/module-solar-flux.webp',
+                img: './flight-kit/module-solar-flux.webp',
               },
               {
                 id: 'telecom',
                 title: isTr ? 'DSN İletişimi' : 'DSN Telecom',
                 desc: isTr ? 'Serbest uzay yol kaybı (FSPL) ve anten çapı' : 'Free space path loss & ground receivers',
-                img: '/flight-kit/module-dsn-comm.webp',
+                img: './flight-kit/module-dsn-comm.webp',
               },
               {
                 id: 'radiation',
                 title: isTr ? 'Radyasyon Kalkanı' : 'Radiation Shielding',
                 desc: isTr ? 'Güneş fırtınaları ve iyonize parçacıklar' : 'Coronal mass ejections & ion hardening',
-                img: '/flight-kit/module-radiation.webp',
+                img: './flight-kit/module-radiation.webp',
               },
               {
                 id: 'tradeoffs',
                 title: isTr ? 'Sistem Dengeleme' : 'System Trades',
                 desc: isTr ? 'Kütle, bütçe ve bilim puanı optimizasyonu' : 'Pareto-optimal mass, budget & payload balance',
-                img: '/flight-kit/module-tradeoffs.webp',
+                img: './flight-kit/module-tradeoffs.webp',
               },
             ].map((mod) => (
               <div

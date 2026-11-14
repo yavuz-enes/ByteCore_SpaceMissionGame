@@ -62,16 +62,16 @@ export const App: React.FC = () => {
       {/* Ambient Deep Space, Cockpit Canopy & Space Grid Overlays (strictly behind content) */}
       <div
         className="fixed inset-0 pointer-events-none -z-20 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url('/flight-kit/bg-hero-deepspace.webp')` }}
+        style={{ backgroundImage: `url('./flight-kit/bg-hero-deepspace.webp')` }}
       />
       <div className="fixed inset-0 pointer-events-none -z-10 bg-[#0B0F17]/35" />
       <div
         className="fixed inset-0 pointer-events-none -z-10 opacity-15"
-        style={{ backgroundImage: `url('/flight-kit/orbital-grid-pattern.svg')`, backgroundSize: '320px' }}
+        style={{ backgroundImage: `url('./flight-kit/orbital-grid-pattern.svg')`, backgroundSize: '320px' }}
       />
       <div
         className="fixed inset-0 pointer-events-none -z-10 bg-cover bg-center opacity-25 mix-blend-screen"
-        style={{ backgroundImage: `url('/flight-kit/bg-cockpit-overlay.png')` }}
+        style={{ backgroundImage: `url('./flight-kit/bg-cockpit-overlay.png')` }}
       />
 
       {/* Top Navigation & Status */}

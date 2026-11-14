@@ -23,11 +23,11 @@ import {
 } from '../../data/academyContent';
 
 const MODULE_ARTWORK: Record<StandaloneModuleId, string> = {
-  'delta-v': '/flight-kit/module-delta-v.webp',
-  'solar-thermal': '/flight-kit/module-solar-flux.webp',
-  'deep-space-comm': '/flight-kit/module-dsn-comm.webp',
-  'radiation-environment': '/flight-kit/module-radiation.webp',
-  'subsystem-tradeoffs': '/flight-kit/module-tradeoffs.webp',
+  'delta-v': './flight-kit/module-delta-v.webp',
+  'solar-thermal': './flight-kit/module-solar-flux.webp',
+  'deep-space-comm': './flight-kit/module-dsn-comm.webp',
+  'radiation-environment': './flight-kit/module-radiation.webp',
+  'subsystem-tradeoffs': './flight-kit/module-tradeoffs.webp',
 };
 
 export const SpaceAcademyStandalone: React.FC = () => {
@@ -219,11 +219,11 @@ export const SpaceAcademyStandalone: React.FC = () => {
       {/* Ambient Deep Space & Aerospace Hangar Artwork (Positioned safely behind all content) */}
       <div
         className="fixed inset-0 bg-cover bg-center bg-no-repeat pointer-events-none -z-20"
-        style={{ backgroundImage: `url('/flight-kit/bg-hero-deepspace.webp')` }}
+        style={{ backgroundImage: `url('./flight-kit/bg-hero-deepspace.webp')` }}
       />
       <div
         className="fixed inset-0 bg-cover bg-center opacity-25 pointer-events-none mix-blend-screen -z-10"
-        style={{ backgroundImage: `url('/flight-kit/bg-academy-hangar.webp')` }}
+        style={{ backgroundImage: `url('./flight-kit/bg-academy-hangar.webp')` }}
       />
       <div className="fixed inset-0 bg-[#0B0F17]/35 pointer-events-none -z-10" />
 
@@ -469,7 +469,7 @@ export const SpaceAcademyStandalone: React.FC = () => {
                   {/* Module Artwork Hero Banner */}
                   <div className="relative w-full h-32 sm:h-44 rounded-xl overflow-hidden border border-white/10 bg-[#080C14]">
                     <img
-                      src={MODULE_ARTWORK[activeModule.id] || '/flight-kit/module-delta-v.webp'}
+                      src={MODULE_ARTWORK[activeModule.id] || './flight-kit/module-delta-v.webp'}
                       alt={activeModule.title}
                       className="w-full h-full object-cover"
                       loading="lazy"
@@ -937,7 +937,7 @@ export const SpaceAcademyStandalone: React.FC = () => {
               <div className="border border-emerald-500/40 rounded-2xl overflow-hidden p-8 bg-[#0B1516] text-center space-y-5 shadow-2xl">
                 <div className="w-24 h-24 mx-auto">
                   <img
-                    src="/flight-kit/seal-nasa-flight-ready.png"
+                    src="./flight-kit/seal-nasa-flight-ready.png"
                     alt="Official Aerospace Flight Qualification Seal"
                     className="w-full h-full object-contain filter drop-shadow-[0_0_18px_rgba(16,185,129,0.5)]"
                   />

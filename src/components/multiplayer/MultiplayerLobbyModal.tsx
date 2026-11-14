@@ -15,17 +15,17 @@ import { TRANSLATIONS } from '../../i18n/translations';
 import { getLocalizedScenarios, TARGET_TRANSLATIONS } from '../../i18n/missionsLocale';
 
 const ROLE_AVATARS: Record<PlayerRole, string> = {
-  commander: '/flight-kit/avatar-commander.png',
-  engineer: '/flight-kit/avatar-engineer.png',
-  scientist: '/flight-kit/avatar-scientist.png',
-  comms: '/flight-kit/avatar-comms.png',
+  commander: './flight-kit/avatar-commander.png',
+  engineer: './flight-kit/avatar-engineer.png',
+  scientist: './flight-kit/avatar-scientist.png',
+  comms: './flight-kit/avatar-comms.png',
 };
 
 const DESTINATION_ARTWORK: Record<string, string> = {
-  'lunar-recon': '/flight-kit/card-moon-shackleton.webp',
-  'mars-recon': '/flight-kit/card-mars-valles.webp',
-  'europa-recon': '/flight-kit/card-europa-ice.webp',
-  'asteroid-scout': '/flight-kit/card-asteroid-psyche.webp',
+  'lunar-recon': './flight-kit/card-moon-shackleton.webp',
+  'mars-recon': './flight-kit/card-mars-valles.webp',
+  'europa-recon': './flight-kit/card-europa-ice.webp',
+  'asteroid-scout': './flight-kit/card-asteroid-psyche.webp',
 };
 
 interface MultiplayerLobbyModalProps {
@@ -448,7 +448,7 @@ export const MultiplayerLobbyModal: React.FC<MultiplayerLobbyModalProps> = ({
                             <div className="flex items-center space-x-3">
                               <div className="w-12 h-12 rounded-xl overflow-hidden border border-white/10 shrink-0 bg-[#080C14]">
                                 <img
-                                  src={DESTINATION_ARTWORK[destId] || '/flight-kit/card-moon-shackleton.webp'}
+                                  src={DESTINATION_ARTWORK[destId] || './flight-kit/card-moon-shackleton.webp'}
                                   alt={sc?.name || destId}
                                   className="w-full h-full object-cover"
                                   loading="lazy"

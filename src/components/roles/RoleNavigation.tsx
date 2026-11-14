@@ -5,10 +5,10 @@ import { PlayerRole } from '../../types/mission';
 import { TRANSLATIONS } from '../../i18n/translations';
 
 const ROLE_AVATARS: Record<PlayerRole, string> = {
-  commander: '/flight-kit/avatar-commander.png',
-  engineer: '/flight-kit/avatar-engineer.png',
-  scientist: '/flight-kit/avatar-scientist.png',
-  comms: '/flight-kit/avatar-comms.png',
+  commander: './flight-kit/avatar-commander.png',
+  engineer: './flight-kit/avatar-engineer.png',
+  scientist: './flight-kit/avatar-scientist.png',
+  comms: './flight-kit/avatar-comms.png',
 };
 
 export const RoleNavigation: React.FC = () => {

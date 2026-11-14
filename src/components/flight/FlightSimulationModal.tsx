@@ -23,21 +23,21 @@ import { GimbalTrimMiniGame } from '../minigames/GimbalTrimMiniGame';
 const getAnomalyArtwork = (anomalyId: string, anomalyType: string): string => {
   const key = `${anomalyId} ${anomalyType}`.toLowerCase();
   if (key.includes('solar') || key.includes('cosmic') || key.includes('radiation') || key.includes('flare')) {
-    return '/flight-kit/anomaly-solar-flare.webp';
+    return './flight-kit/anomaly-solar-flare.webp';
   }
   if (key.includes('thruster') || key.includes('wheel') || key.includes('gimbal') || key.includes('vector')) {
-    return '/flight-kit/anomaly-thruster-failure.webp';
+    return './flight-kit/anomaly-thruster-failure.webp';
   }
   if (key.includes('leak') || key.includes('cryo') || key.includes('tank') || key.includes('eclipse') || key.includes('thermal')) {
-    return '/flight-kit/anomaly-cryo-leak.webp';
+    return './flight-kit/anomaly-cryo-leak.webp';
   }
   if (key.includes('dsn') || key.includes('blackout') || key.includes('comm') || key.includes('radio') || key.includes('carrier')) {
-    return '/flight-kit/anomaly-dsn-blackout.webp';
+    return './flight-kit/anomaly-dsn-blackout.webp';
   }
   if (key.includes('meteor') || key.includes('debris') || key.includes('star-tracker') || key.includes('impact')) {
-    return '/flight-kit/anomaly-micrometeoroid.webp';
+    return './flight-kit/anomaly-micrometeoroid.webp';
   }
-  return '/flight-kit/anomaly-solar-flare.webp';
+  return './flight-kit/anomaly-solar-flare.webp';
 };
 
 interface FlightSimulationModalProps {
@@ -468,7 +468,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
               <div className="border border-emerald-500/30 rounded-2xl overflow-hidden p-6 text-center space-y-4 bg-[#0B0F17]">
                 <div className="w-20 h-20 mx-auto">
                   <img
-                    src="/flight-kit/seal-nasa-flight-ready.png"
+                    src="./flight-kit/seal-nasa-flight-ready.png"
                     alt="Flight Ready Qualification Seal"
                     className="w-full h-full object-contain filter drop-shadow-[0_0_14px_rgba(16,185,129,0.4)]"
                   />
@@ -929,7 +929,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
 
                   <div className="w-20 h-20 mx-auto opacity-75">
                     <img
-                      src="/flight-kit/hud-navball.png"
+                      src="./flight-kit/hud-navball.png"
                       alt="Navball Flight Director"
                       className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(56,189,248,0.3)] animate-pulse"
                     />

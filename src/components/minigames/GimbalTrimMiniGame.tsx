@@ -100,7 +100,7 @@ export const GimbalTrimMiniGame: React.FC<GimbalTrimMiniGameProps> = ({
         {/* Navball Attitude Backdrop Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
           <img
-            src="/flight-kit/hud-navball.png"
+            src="./flight-kit/hud-navball.png"
             alt="Attitude Navball"
             className="w-28 h-28 object-contain"
           />

@@ -175,7 +175,7 @@ export const DsnFrequencyMiniGame: React.FC<DsnFrequencyMiniGameProps> = ({
         {/* Subtle Frequency Waveform Watermark */}
         <div
           className="absolute inset-0 pointer-events-none opacity-15 bg-center bg-no-repeat bg-contain"
-          style={{ backgroundImage: `url('/flight-kit/hud-frequency-wave.svg')` }}
+          style={{ backgroundImage: `url('./flight-kit/hud-frequency-wave.svg')` }}
         />
         <canvas ref={canvasRef} width={480} height={130} className="w-full h-32 block relative z-10" />
 
