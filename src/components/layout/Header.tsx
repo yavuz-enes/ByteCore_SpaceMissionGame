@@ -5,12 +5,10 @@ import {
   AlertTriangle,
   Play,
   Settings,
-  BookOpen,
 } from 'lucide-react';
 import { useMissionStore } from '../../store/missionStore';
 import { TRANSLATIONS } from '../../i18n/translations';
 import { SettingsModal } from '../settings/SettingsModal';
-import { NASAOfficialResourcesModal } from './NASAOfficialResourcesModal';
 
 interface HeaderProps {
   onOpenMultiplayer: () => void;
@@ -28,7 +26,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMultiplayer, onOpenFlightM
   } = useMissionStore();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const t = TRANSLATIONS[locale].header;
   const isTr = locale === 'tr';
 
@@ -60,17 +57,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMultiplayer, onOpenFlightM
 
           {/* Right: Essential Telemetry Status, Launch CTA & Settings Button */}
           <div className="flex items-center space-x-1.5 sm:space-x-3 flex-shrink-0">
-            {/* NASA & CSA Official Challenge Resources Button */}
-            <button
-              onClick={() => setIsResourcesOpen(true)}
-              className="flex items-center space-x-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border border-sky-500/40 bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 text-xs font-mono font-medium transition-all cursor-pointer shadow-[0_0_12px_rgba(56,189,248,0.2)] flex-shrink-0"
-              title={isTr ? 'Yarışmada Verilen Resmi NASA ve CSA Kaynakları' : 'Official NASA & CSA Challenge Resources'}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-sky-400" />
-              <span className="hidden sm:inline">{isTr ? 'NASA/CSA Kaynakları' : 'NASA/CSA Sources'}</span>
-              <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-sky-400 text-slate-950 font-bold">4+4</span>
-            </button>
-
             {/* Single Dedicated Settings Modal Trigger (Positioned to the left of Review Pill) */}
             <button
               onClick={() => setIsSettingsOpen(true)}
@@ -118,12 +104,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMultiplayer, onOpenFlightM
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         onOpenMultiplayer={onOpenMultiplayer}
-      />
-
-      {/* NASA & CSA Official Challenge Resources Modal */}
-      <NASAOfficialResourcesModal
-        isOpen={isResourcesOpen}
-        onClose={() => setIsResourcesOpen(false)}
       />
     </>
   );

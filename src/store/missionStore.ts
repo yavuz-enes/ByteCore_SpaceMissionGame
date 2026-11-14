@@ -1610,22 +1610,36 @@ export const useMissionStore = create<MissionStore>((set, get) => {
     triggerAnomaly: () => {
       const state = get();
       const anomalies = getLocalizedAnomalies(state.locale);
-      const randomAnomaly = anomalies[Math.floor(Math.random() * anomalies.length)];
+
+      // Dynamic probability weighting based on flight parameters
+      let selectedAnomaly = anomalies[Math.floor(Math.random() * anomalies.length)];
+
+      if (state.telemetry.netPowerW <= 30 && Math.random() < 0.75) {
+        selectedAnomaly = anomalies.find((a) => a.id === 'anomaly-electrical-harness') || selectedAnomaly;
+      } else if (state.telemetry.deltaVMarginPercent <= 15 && Math.random() < 0.75) {
+        selectedAnomaly = anomalies.find((a) => a.id === 'anomaly-propellant-cavitation') || selectedAnomaly;
+      } else if (!state.telemetry.radiationSafe && Math.random() < 0.75) {
+        selectedAnomaly = anomalies.find((a) => a.id === 'anomaly-solar-storm' || a.id === 'anomaly-seu-bitflip') || selectedAnomaly;
+      } else if (state.environmentalTests.tvacScore < 80 && Math.random() < 0.7) {
+        selectedAnomaly = anomalies.find((a) => a.id === 'anomaly-battery-thermal') || selectedAnomaly;
+      } else if (state.environmentalTests.vibrationScore < 80 && Math.random() < 0.7) {
+        selectedAnomaly = anomalies.find((a) => a.id === 'anomaly-electrical-harness') || selectedAnomaly;
+      }
 
       set({
-        activeAnomaly: randomAnomaly,
-        anomalyCountdown: randomAnomaly.urgencySeconds,
+        activeAnomaly: selectedAnomaly,
+        anomalyCountdown: selectedAnomaly.urgencySeconds,
         anomalyVotes: {},
       });
 
       if (state.isMultiplayer && state.isHost) {
         multiplayerService.broadcastPacket({
           type: 'ANOMALY_TRIGGERED',
-          anomaly: randomAnomaly,
+          anomaly: selectedAnomaly,
         });
       }
 
-      state.addLogMessage(`[ANOMALY TRIGGERED] ${randomAnomaly.title}`);
+      state.addLogMessage(`[ANOMALY TRIGGERED] ${selectedAnomaly.title}`);
     },
 
     voteAnomalyChoice: (choiceId: string) => {
@@ -1662,38 +1676,37 @@ export const useMissionStore = create<MissionStore>((set, get) => {
     tallyAndResolveAnomaly: () => {
       const state = get();
       const anomaly = state.activeAnomaly;
-      if (!anomaly) return;
+      if (!anomaly || anomaly.choices.length === 0) return;
 
-      const choice0Id = anomaly.choices[0].id;
-      const choice1Id = anomaly.choices[1].id;
-      let count0 = 0;
-      let count1 = 0;
-      let commanderVote: string | null = null;
+      const voteCounts: Record<string, number> = {};
+      anomaly.choices.forEach((c) => {
+        voteCounts[c.id] = 0;
+      });
 
       const commander = state.players.find((p) => p.role === 'commander');
       const commanderPeerId = commander ? commander.peerId : null;
+      let commanderVote: string | null = null;
 
       Object.entries(state.anomalyVotes).forEach(([peerId, choiceId]) => {
-        if (choiceId === choice0Id) count0++;
-        if (choiceId === choice1Id) count1++;
+        if (voteCounts[choiceId] !== undefined) {
+          voteCounts[choiceId]++;
+        }
         if (commanderPeerId && peerId === commanderPeerId) {
           commanderVote = choiceId;
         }
       });
 
-      let winningChoiceId = choice0Id;
-      if (count1 > count0) {
-        winningChoiceId = choice1Id;
-      } else if (count0 > count1) {
-        winningChoiceId = choice0Id;
-      } else {
-        // Tie break defaults to Commander
-        if (commanderVote) {
-          winningChoiceId = commanderVote;
-        } else {
-          winningChoiceId = choice0Id;
+      // Find choice with max votes
+      let maxVotes = -1;
+      let winningChoiceId = anomaly.choices[0].id;
+      Object.entries(voteCounts).forEach(([choiceId, count]) => {
+        if (count > maxVotes) {
+          maxVotes = count;
+          winningChoiceId = choiceId;
+        } else if (count === maxVotes && commanderVote === choiceId) {
+          winningChoiceId = choiceId;
         }
-      }
+      });
 
       get().resolveAnomaly(winningChoiceId);
     },

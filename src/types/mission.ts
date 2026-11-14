@@ -182,11 +182,17 @@ export interface MissionAnomaly {
     | 'solar-array-misalignment'
     | 'thruster-thermal-overload'
     | 'cosmic-ray-upset'
-    | 'star-tracker-loss';
+    | 'star-tracker-loss'
+    | 'electrical-harness-rupture'
+    | 'battery-thermal-runaway'
+    | 'micrometeoroid-puncture'
+    | 'propellant-cavitation'
+    | 'dsn-carrier-slip';
   title: string;
   description: string;
   urgencySeconds: number;
-  choices: [AnomalyChoice, AnomalyChoice];
+  triggerCondition?: string;
+  choices: AnomalyChoice[];
 }
 
 export interface EnvironmentalTestState {

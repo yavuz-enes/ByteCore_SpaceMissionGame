@@ -609,39 +609,11 @@ export const LandingPage: React.FC = () => {
 
                   {/* Quick Crew & AI Action Helpers */}
                   <div className="flex flex-wrap items-center gap-2">
-                    {/* 2-Player Dual Station Auto-Distribution */}
-                    <button
-                      onClick={() => {
-                        if (isHost) {
-                          claimRole('commander');
-                          claimSecondaryRole('comms');
-                        } else {
-                          claimRole('engineer');
-                          claimSecondaryRole('scientist');
-                        }
-                      }}
-                      className="flex items-center space-x-1.5 px-3 py-1 rounded-full border border-sky-500/40 hover:border-sky-400 text-[11px] text-sky-300 hover:text-white transition-colors bg-sky-500/10"
-                      title={isTr ? '2 kişi oynarken tüm 4 istasyonu 2 ve 2 olarak otomatik paylaştırır' : 'Auto-splits all 4 stations across 2 players (Commander/Comms & Engineer/Science)'}
-                    >
-                      <Users className="w-3.5 h-3.5" />
-                      <span>{isTr ? '2 Kişilik Dağılım (2 İstasyon/Kişi)' : '2-Player Split (2 Stations/Player)'}</span>
-                    </button>
-
-                    {/* AI Flight Assistant: Auto-Optimize All Systems */}
-                    <button
-                      onClick={optimizeWithAI}
-                      className="flex items-center space-x-1.5 px-3 py-1 rounded-full border border-emerald-500/40 hover:border-emerald-400 text-[11px] text-emerald-300 hover:text-white transition-colors bg-emerald-500/10"
-                      title={isTr ? 'Yapay zeka tüm alt sistemleri analiz eder ve uçuşu nominal seviyeye getirir' : 'AI balances all subsystems to achieve nominal flight readiness'}
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>{isTr ? 'Yapay Zeka ile Optimize Et' : 'AI Auto-Optimize'}</span>
-                    </button>
-
                     {/* Add Simulated Test Co-Pilot (Makes Autonomous Subsystem Changes) */}
                     {players.length < 4 && (
                       <button
                         onClick={addSimulatedCoPilot}
-                        className="flex items-center space-x-1.5 px-3 py-1 rounded-full border border-slate-700/80 hover:border-slate-500 text-[11px] text-slate-300 hover:text-white transition-colors bg-slate-900/60"
+                        className="flex items-center space-x-1.5 px-3 py-1 rounded-full border border-slate-700/80 hover:border-slate-500 text-[11px] text-slate-300 hover:text-white transition-colors bg-slate-900/60 cursor-pointer"
                         title="Add a simulated co-pilot that actively modifies its station subsystems"
                       >
                         <UserPlus className="w-3.5 h-3.5" />
@@ -805,16 +777,6 @@ export const LandingPage: React.FC = () => {
                         {isTr ? 'Sefer Rotası' : 'Campaign'}: <strong>{destinations.map((d) => content.destinations.find((cd) => cd.id === d)?.name || d).join(' ➔ ')}</strong>
                       </span>
                     </div>
-
-                    <p className="text-slate-400 text-xs max-w-lg leading-relaxed">
-                      {hasTwoPlayers
-                        ? (isTr
-                            ? 'Mürettebat koşulu sağlandı. Fırlatıldığında seçilen sefer rotası kilitlenir ve aktif uçuş konsolunda simülasyona başlanır.'
-                            : 'Minimum crew satisfied. Launching locks this campaign sequence inside the flight bridge for the multi-stage mission.')
-                        : (isTr
-                            ? 'Görevi başlatmak için lobide en az 2 oyuncu bulunmalıdır. Arkadaşınızı davet edin veya test için "Test Co-Pilot Ekle" butonunu kullanın.'
-                            : 'At least 2 players must be in the lobby to start the mission. Invite a teammate or click "Add Test Co-Pilot" for solo evaluation.')}
-                    </p>
                   </div>
 
                   <div>

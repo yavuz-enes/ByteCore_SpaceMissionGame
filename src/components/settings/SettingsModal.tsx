@@ -11,8 +11,10 @@ import {
   Eye,
   Sliders,
   LogOut,
+  BookOpen,
 } from 'lucide-react';
 import { useMissionStore } from '../../store/missionStore';
+import { NASAOfficialResourcesModal } from '../layout/NASAOfficialResourcesModal';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -43,6 +45,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   } = useMissionStore();
 
   const [copied, setCopied] = useState(false);
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
   const isTr = locale === 'tr';
 
   if (!isOpen) return null;
@@ -262,8 +265,41 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
             </div>
           </div>
+
+          {/* 5. NASA & CSA Official Challenge Resources */}
+          <div className="border border-sky-500/30 rounded-2xl overflow-hidden p-4 bg-[#0B0F17]/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center space-x-2 text-sky-300 font-semibold tracking-wider uppercase">
+                <BookOpen className="w-3.5 h-3.5 text-sky-400" />
+                <span>{isTr ? 'NASA VE CSA YARIŞMA KAYNAKLARI' : 'NASA & CSA CHALLENGE SOURCES'}</span>
+              </span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-300 font-bold">
+                4 + 4
+              </span>
+            </div>
+
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              {isTr
+                ? 'NASA Space Apps Challenge resmi araştırma araçları (Webb Build-It-Yourself, Mission-Viz, VR Challenge, CSA Aktiviteleri) ve 4 resmi NASA mühendislik el kitabı.'
+                : 'Official NASA Space Apps Challenge research tools and 4 official NASA engineering handbooks.'}
+            </p>
+
+            <button
+              onClick={() => setIsResourcesOpen(true)}
+              className="w-full py-2 px-4 rounded-full bg-sky-500/15 border border-sky-400/40 hover:bg-sky-500/25 text-sky-200 font-semibold transition-all cursor-pointer flex items-center justify-center space-x-2 shadow-sm"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-sky-400" />
+              <span>{isTr ? 'NASA & CSA Kaynak Raporunu Aç' : 'Open NASA & CSA Sources Report'}</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* NASA & CSA Official Challenge Resources Modal */}
+      <NASAOfficialResourcesModal
+        isOpen={isResourcesOpen}
+        onClose={() => setIsResourcesOpen(false)}
+      />
     </div>
   );
 };
