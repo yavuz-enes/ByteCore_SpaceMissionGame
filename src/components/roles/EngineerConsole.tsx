@@ -9,6 +9,28 @@ import {
 } from '../../i18n/missionsLocale';
 import { TRANSLATIONS } from '../../i18n/translations';
 
+const PROPULSION_ARTWORK: Record<string, string> = {
+  'prop-coldgas': './flight-kit/prop-cold-gas.webp',
+  'prop-monoprop': './flight-kit/prop-hall-hermes.webp',
+  'prop-biprop': './flight-kit/prop-chemical-biprop.webp',
+  'prop-ion': './flight-kit/prop-ion-nextc.webp',
+  'prop-nuclear': './flight-kit/prop-nuclear-ntp.webp',
+};
+
+const POWER_ARTWORK: Record<string, string> = {
+  'power-body': './flight-kit/power-solar-ultraflex.webp',
+  'power-deployable': './flight-kit/power-solar-gaas.webp',
+  'power-gallium': './flight-kit/power-solar-gaas.webp',
+  'power-rtg': './flight-kit/power-rtg-nextgen.webp',
+  'power-fission': './flight-kit/power-kilopower-fission.webp',
+};
+
+const BATTERY_ARTWORK: Record<string, string> = {
+  'batt-standard': './flight-kit/batt-li-ion-nmc.webp',
+  'batt-advanced': './flight-kit/batt-li-sulfur.webp',
+  'batt-heavy': './flight-kit/batt-supercap-hybrid.webp',
+};
+
 export const EngineerConsole: React.FC = () => {
   const {
     missionState,
@@ -86,7 +108,19 @@ export const EngineerConsole: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
           {/* Shake Table */}
-          <div className="p-3 border border-slate-800 rounded-2xl overflow-hidden bg-[#0B0F17] flex flex-col justify-between space-y-2">
+          <div className="p-3 border border-slate-800 rounded-2xl overflow-hidden bg-[#0B0F17] flex flex-col justify-between space-y-2.5">
+            <div className="relative w-full h-24 rounded-xl overflow-hidden bg-[#080C14] border border-white/10">
+              <img
+                src="./flight-kit/eng-shake-table-rig.webp"
+                alt="Shake Table Bench"
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/20 to-transparent" />
+              <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-black/75 border border-white/20 text-sky-300">
+                AEROSPACE RIG
+              </span>
+            </div>
             <div className="flex items-center justify-between">
               <span className="text-slate-400 uppercase font-bold text-[11px]">
                 {isTr ? 'TİTREŞİM MASASI' : 'SHAKE TABLE'}
@@ -268,30 +302,45 @@ export const EngineerConsole: React.FC = () => {
                     : 'border-slate-800 hover:border-slate-700 bg-[#0E1422] cursor-pointer'
                 }`}
               >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">{prop.type}</span>
-                    <h4 className="font-display font-bold text-sm text-white mt-0.5">{prop.name}</h4>
-                    {isLocked && (
-                      <span className="text-[9px] font-mono text-amber-400 uppercase tracking-wider block mt-0.5">
-                        {isTr ? 'GÜVENLİK YETKİSİ GEREKLİ' : 'CLEARANCE REQUIRED'}
+                <div>
+                  {/* Aerospace Engine Hardware Render */}
+                  <div className="relative w-full h-24 rounded-xl overflow-hidden mb-2.5 bg-[#080C14] border border-white/10">
+                    <img
+                      src={PROPULSION_ARTWORK[prop.id] || './flight-kit/prop-chemical-biprop.webp'}
+                      alt={prop.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
+                    <span className="absolute bottom-1.5 left-2 text-[9px] font-mono text-sky-300 font-semibold uppercase">
+                      {prop.type}
+                    </span>
+                  </div>
+
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-display font-bold text-sm text-white mt-0.5">{prop.name}</h4>
+                      {isLocked && (
+                        <span className="text-[9px] font-mono text-amber-400 uppercase tracking-wider block mt-0.5">
+                          {isTr ? 'GÜVENLİK YETKİSİ GEREKLİ' : 'CLEARANCE REQUIRED'}
+                        </span>
+                      )}
+                    </div>
+                    {isLocked ? (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-300 flex items-center space-x-1">
+                        <Lock className="w-2.5 h-2.5" />
+                        <span>{pendingReq ? (isTr ? 'BEKLENİYOR' : 'PENDING') : (isTr ? 'YETKİ İSTE' : 'REQUEST AUTH')}</span>
+                      </span>
+                    ) : isSelected ? (
+                      <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-white text-slate-950">
+                        {t.selectedBadge}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-slate-700/60 text-slate-400 hover:text-white">
+                        {isTr ? 'SEÇ' : 'SELECT'}
                       </span>
                     )}
                   </div>
-                  {isLocked ? (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-300 flex items-center space-x-1">
-                      <Lock className="w-2.5 h-2.5" />
-                      <span>{pendingReq ? (isTr ? 'BEKLENİYOR' : 'PENDING') : (isTr ? 'YETKİ İSTE' : 'REQUEST AUTH')}</span>
-                    </span>
-                  ) : isSelected ? (
-                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-white text-slate-950">
-                      {t.selectedBadge}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-slate-700/60 text-slate-400 hover:text-white">
-                      {isTr ? 'SEÇ' : 'SELECT'}
-                    </span>
-                  )}
                 </div>
 
                 <div className="mt-3 pt-2.5 border-t border-slate-800 space-y-1 font-mono text-xs tabular-nums">
@@ -356,29 +405,45 @@ export const EngineerConsole: React.FC = () => {
                     : 'border-slate-800 hover:border-slate-700 bg-[#0E1422] cursor-pointer'
                 }`}
               >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="font-display font-bold text-sm text-white">{pwr.name}</h4>
-                    {isLocked && (
-                      <span className="text-[9px] font-mono text-amber-400 uppercase tracking-wider block mt-0.5">
-                        {isTr ? 'GÜVENLİK YETKİSİ GEREKLİ' : 'CLEARANCE REQUIRED'}
+                <div>
+                  {/* Spacecraft Power System Hardware Render */}
+                  <div className="relative w-full h-24 rounded-xl overflow-hidden mb-2.5 bg-[#080C14] border border-white/10">
+                    <img
+                      src={POWER_ARTWORK[pwr.id] || './flight-kit/power-solar-gaas.webp'}
+                      alt={pwr.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
+                    <span className="absolute bottom-1.5 left-2 text-[9px] font-mono text-emerald-300 font-semibold uppercase">
+                      +{pwr.basePowerW}W
+                    </span>
+                  </div>
+
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-display font-bold text-sm text-white">{pwr.name}</h4>
+                      {isLocked && (
+                        <span className="text-[9px] font-mono text-amber-400 uppercase tracking-wider block mt-0.5">
+                          {isTr ? 'GÜVENLİK YETKİSİ GEREKLİ' : 'CLEARANCE REQUIRED'}
+                        </span>
+                      )}
+                    </div>
+                    {isLocked ? (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-300 flex items-center space-x-1">
+                        <Lock className="w-2.5 h-2.5" />
+                        <span>{pendingReq ? (isTr ? 'BEKLENİYOR' : 'PENDING') : (isTr ? 'YETKİ İSTE' : 'REQUEST AUTH')}</span>
+                      </span>
+                    ) : isSelected ? (
+                      <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-white text-slate-950">
+                        {t.selectedBadge}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-slate-700/60 text-slate-400 hover:text-white">
+                        {isTr ? 'SEÇ' : 'SELECT'}
                       </span>
                     )}
                   </div>
-                  {isLocked ? (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-300 flex items-center space-x-1">
-                      <Lock className="w-2.5 h-2.5" />
-                      <span>{pendingReq ? (isTr ? 'BEKLENİYOR' : 'PENDING') : (isTr ? 'YETKİ İSTE' : 'REQUEST AUTH')}</span>
-                    </span>
-                  ) : isSelected ? (
-                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-white text-slate-950">
-                      {t.selectedBadge}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-slate-700/60 text-slate-400 hover:text-white">
-                      {isTr ? 'SEÇ' : 'SELECT'}
-                    </span>
-                  )}
                 </div>
 
                 <div className="mt-3 pt-2.5 border-t border-slate-800 space-y-1 font-mono text-xs tabular-nums">
@@ -430,17 +495,33 @@ export const EngineerConsole: React.FC = () => {
                     : 'border-slate-800 hover:border-slate-700 bg-[#0E1422] cursor-pointer'
                 }`}
               >
-                <div className="flex items-start justify-between">
-                  <h4 className="font-display font-bold text-sm text-white">{bat.name}</h4>
-                  {isSelected ? (
-                    <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-white text-slate-950">
-                      {t.selectedBadge}
+                <div>
+                  {/* Space-Grade Battery Pack Render */}
+                  <div className="relative w-full h-24 rounded-xl overflow-hidden mb-2.5 bg-[#080C14] border border-white/10">
+                    <img
+                      src={BATTERY_ARTWORK[bat.id] || './flight-kit/batt-li-ion-nmc.webp'}
+                      alt={bat.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
+                    <span className="absolute bottom-1.5 left-2 text-[9px] font-mono text-sky-300 font-semibold uppercase">
+                      {bat.capacityWh} Wh
                     </span>
-                  ) : (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-slate-700/60 text-slate-400 hover:text-white">
-                      {isTr ? 'SEÇ' : 'SELECT'}
-                    </span>
-                  )}
+                  </div>
+
+                  <div className="flex items-start justify-between">
+                    <h4 className="font-display font-bold text-sm text-white">{bat.name}</h4>
+                    {isSelected ? (
+                      <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-white text-slate-950">
+                        {t.selectedBadge}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-slate-700/60 text-slate-400 hover:text-white">
+                        {isTr ? 'SEÇ' : 'SELECT'}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mt-3 pt-2.5 border-t border-slate-800 space-y-1 font-mono text-xs tabular-nums">

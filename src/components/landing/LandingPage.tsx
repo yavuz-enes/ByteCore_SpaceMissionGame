@@ -34,10 +34,13 @@ import { MissionId, PlayerRole } from '../../types/mission';
 import { multiplayerService } from '../../services/multiplayerService';
 
 const DESTINATION_ARTWORK: Record<string, string> = {
-  'lunar-recon': './flight-kit/card-moon-shackleton.webp',
-  'mars-recon': './flight-kit/card-mars-valles.webp',
-  'europa-recon': './flight-kit/card-europa-ice.webp',
-  'asteroid-scout': './flight-kit/card-asteroid-psyche.webp',
+  'lunar-recon': './flight-kit/scenario-moon-shackleton.webp',
+  'mars-sample': './flight-kit/scenario-mars-valles.webp',
+  'mars-recon': './flight-kit/scenario-mars-valles.webp',
+  'europa-explorer': './flight-kit/scenario-europa-ice.webp',
+  'europa-recon': './flight-kit/scenario-europa-ice.webp',
+  'europa-ice': './flight-kit/scenario-europa-ice.webp',
+  'asteroid-scout': './flight-kit/scenario-asteroid-psyche.webp',
 };
 
 export const LandingPage: React.FC = () => {
@@ -244,10 +247,10 @@ export const LandingPage: React.FC = () => {
           </p>
 
           {/* Hero CTAs */}
-          <div className="pt-4 flex flex-wrap items-center justify-center gap-3">
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
             <a
               href="#lobby"
-              className="px-6 py-3 rounded-full bg-white text-slate-950 hover:bg-slate-100 font-semibold text-xs md:text-sm tracking-wider shadow-sm transition-all flex items-center space-x-2"
+              className="px-6 py-2.5 rounded-full bg-white text-slate-950 hover:bg-slate-100 font-semibold text-xs md:text-sm tracking-wider shadow-sm transition-all flex items-center space-x-2"
             >
               <Users className="w-4 h-4" />
               <span>{content.site.createRoomBtn}</span>
@@ -255,11 +258,116 @@ export const LandingPage: React.FC = () => {
 
             <button
               onClick={handleSoloStart}
-              className="px-6 py-3 rounded-full bg-slate-900/80 border border-slate-700/80 text-slate-200 hover:text-white hover:border-slate-500 text-xs md:text-sm font-semibold transition-all flex items-center space-x-2 cursor-pointer"
+              className="px-6 py-2.5 rounded-full bg-slate-900/80 border border-slate-700/80 text-slate-200 hover:text-white hover:border-slate-500 text-xs md:text-sm font-semibold transition-all flex items-center space-x-2 cursor-pointer"
             >
               <Play className="w-4 h-4" />
               <span>{content.site.soloExploreBtn}</span>
             </button>
+          </div>
+
+          {/* Game Mode Selection Cards Grid */}
+          <div className="pt-6 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto text-left">
+            {/* 1. Solo Flight Deck */}
+            <div
+              onClick={handleSoloStart}
+              className="group relative rounded-2xl overflow-hidden border border-white/10 hover:border-sky-400/60 bg-[#0E1422] transition-all cursor-pointer shadow-lg flex flex-col justify-between"
+            >
+              <div className="relative h-36 sm:h-40 w-full overflow-hidden bg-[#080C14]">
+                <img
+                  src="./flight-kit/mode-solo-cockpit.webp"
+                  alt="Solo Flight Deck"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
+                <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/75 backdrop-blur-md border border-white/20 text-sky-300">
+                  SOLO MODE
+                </span>
+              </div>
+              <div className="p-4 space-y-1.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-display font-bold text-sm sm:text-base text-white group-hover:text-sky-300 transition-colors">
+                    {isTr ? 'Tek Kişilik Uçuş Köprüsü' : 'Solo Flight Deck'}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-mono leading-relaxed">
+                    {isTr
+                      ? 'Tüm alt sistemleri (Komuta, İtki, Bilim, DSN) tek başınıza yöneterek simülasyonu başlatın.'
+                      : 'Architect spacecraft subsystems and pilot orbital missions autonomously.'}
+                  </p>
+                </div>
+                <div className="pt-2 flex items-center space-x-1.5 text-xs font-mono text-sky-400 font-semibold">
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>{isTr ? 'Köprüye Gir ➔' : 'Launch Deck ➔'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. Multiplayer Expedition */}
+            <a
+              href="#lobby"
+              className="group relative rounded-2xl overflow-hidden border border-white/10 hover:border-purple-400/60 bg-[#0E1422] transition-all cursor-pointer shadow-lg flex flex-col justify-between"
+            >
+              <div className="relative h-36 sm:h-40 w-full overflow-hidden bg-[#080C14]">
+                <img
+                  src="./flight-kit/mode-multiplayer-bridge.webp"
+                  alt="Multiplayer Expedition"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
+                <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/75 backdrop-blur-md border border-white/20 text-purple-300">
+                  CO-OP MULTIPLAYER
+                </span>
+              </div>
+              <div className="p-4 space-y-1.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-display font-bold text-sm sm:text-base text-white group-hover:text-purple-300 transition-colors">
+                    {isTr ? 'Çok Oyunculu Görev Odası' : 'Multiplayer Expedition'}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-mono leading-relaxed">
+                    {isTr
+                      ? '4 uzman rolü (Komutan, Mühendis, Bilim İnsanı, Haberleşme) ile senkronize görev.'
+                      : 'Join 4 specialized mission control duty stations in synchronized multi-operator flight.'}
+                  </p>
+                </div>
+                <div className="pt-2 flex items-center space-x-1.5 text-xs font-mono text-purple-300 font-semibold">
+                  <Users className="w-3.5 h-3.5" />
+                  <span>{isTr ? 'Odaya Katıl / Kur ➔' : 'Enter Lobby ➔'}</span>
+                </div>
+              </div>
+            </a>
+
+            {/* 3. Space Academy */}
+            <div
+              onClick={openAcademy}
+              className="group relative rounded-2xl overflow-hidden border border-white/10 hover:border-emerald-400/60 bg-[#0E1422] transition-all cursor-pointer shadow-lg flex flex-col justify-between"
+            >
+              <div className="relative h-36 sm:h-40 w-full overflow-hidden bg-[#080C14]">
+                <img
+                  src="./flight-kit/mode-space-academy.webp"
+                  alt="Space Academy"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
+                <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/75 backdrop-blur-md border border-white/20 text-emerald-300">
+                  NASA ACADEMY
+                </span>
+              </div>
+              <div className="p-4 space-y-1.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-display font-bold text-sm sm:text-base text-white group-hover:text-emerald-300 transition-colors">
+                    {isTr ? 'Uzay Uçuş Akademisi' : 'Space Flight Academy'}
+                  </h3>
+                  <p className="text-xs text-slate-400 font-mono leading-relaxed">
+                    {isTr
+                      ? 'Tsiolkovsky roket denklemi, Hohmann yörünge transferi ve DSN link hesaplama eğitimleri.'
+                      : 'Interactive orbital mechanics, rocket dynamics, and telecommunications simulators.'}
+                  </p>
+                </div>
+                <div className="pt-2 flex items-center space-x-1.5 text-xs font-mono text-emerald-300 font-semibold">
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span>{isTr ? 'Eğitime Başla ➔' : 'Enter Academy ➔'}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -833,31 +941,31 @@ export const LandingPage: React.FC = () => {
                 id: 'delta-v',
                 title: isTr ? 'Delta-V & İtki' : 'Delta-V & Thrust',
                 desc: isTr ? 'Tsiolkovsky roket denklemi ve Hohmann geçişi' : 'Tsiolkovsky equation & Hohmann transfers',
-                img: './flight-kit/module-delta-v.webp',
+                img: './flight-kit/acad-diagram-deltav.webp',
               },
               {
                 id: 'solar',
                 title: isTr ? 'Güneş Akısı & Isı' : 'Solar Flux & Thermal',
                 desc: isTr ? 'Ters kare kanunu (1/r²) ve güç panelleri' : 'Inverse-square irradiance & power margins',
-                img: './flight-kit/module-solar-flux.webp',
+                img: './flight-kit/acad-diagram-solarflux.webp',
               },
               {
                 id: 'telecom',
                 title: isTr ? 'DSN İletişimi' : 'DSN Telecom',
                 desc: isTr ? 'Serbest uzay yol kaybı (FSPL) ve anten çapı' : 'Free space path loss & ground receivers',
-                img: './flight-kit/module-dsn-comm.webp',
+                img: './flight-kit/acad-diagram-linkbudget.webp',
               },
               {
                 id: 'radiation',
                 title: isTr ? 'Radyasyon Kalkanı' : 'Radiation Shielding',
                 desc: isTr ? 'Güneş fırtınaları ve iyonize parçacıklar' : 'Coronal mass ejections & ion hardening',
-                img: './flight-kit/module-radiation.webp',
+                img: './flight-kit/acad-diagram-radiation.webp',
               },
               {
                 id: 'tradeoffs',
                 title: isTr ? 'Sistem Dengeleme' : 'System Trades',
                 desc: isTr ? 'Kütle, bütçe ve bilim puanı optimizasyonu' : 'Pareto-optimal mass, budget & payload balance',
-                img: './flight-kit/module-tradeoffs.webp',
+                img: './flight-kit/acad-diagram-swapc.webp',
               },
             ].map((mod) => (
               <div

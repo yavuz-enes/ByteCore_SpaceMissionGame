@@ -42,23 +42,41 @@ interface FlightSimulationModalProps {
 }
 
 const getAnomalyArtwork = (anomalyId: string, anomalyType: string): string => {
-  const key = `${anomalyId} ${anomalyType}`.toLowerCase();
-  if (key.includes('solar') || key.includes('cosmic') || key.includes('radiation') || key.includes('flare') || key.includes('seu')) {
-    return './flight-kit/anomaly-solar-flare.webp';
+  const id = (anomalyId || '').toLowerCase();
+  const type = (anomalyType || '').toLowerCase();
+
+  if (id.includes('solar-storm') || type.includes('geomagnetic')) {
+    return './flight-kit/crisis-solar-storm.webp';
   }
-  if (key.includes('thruster') || key.includes('wheel') || key.includes('gimbal') || key.includes('cavitation') || key.includes('vector')) {
-    return './flight-kit/anomaly-thruster-failure.webp';
+  if (id.includes('reaction-wheel') || id.includes('attitude') || type.includes('reaction')) {
+    return './flight-kit/crisis-reaction-wheel.webp';
   }
-  if (key.includes('leak') || key.includes('cryo') || key.includes('tank') || key.includes('eclipse') || key.includes('thermal') || key.includes('battery')) {
-    return './flight-kit/anomaly-cryo-leak.webp';
+  if (id.includes('battery-thermal') || id.includes('freeze') || id.includes('eclipse') || id.includes('thermal')) {
+    return './flight-kit/crisis-umbral-freeze.webp';
   }
-  if (key.includes('dsn') || key.includes('blackout') || key.includes('comm') || key.includes('radio') || key.includes('carrier')) {
+  if (id.includes('array-jam') || id.includes('solar-array') || type.includes('deployment') || type.includes('actuator')) {
+    return './flight-kit/crisis-array-jam.webp';
+  }
+  if (id.includes('thruster') || id.includes('cavitation') || type.includes('propulsion') || type.includes('overheat')) {
+    return './flight-kit/crisis-thruster-overheat.webp';
+  }
+  if (id.includes('seu') || id.includes('bitflip') || type.includes('cosmic') || type.includes('radiation')) {
+    return './flight-kit/crisis-cosmic-seu.webp';
+  }
+  if (id.includes('star-tracker') || type.includes('optical') || type.includes('sensor')) {
+    return './flight-kit/crisis-startracker-blind.webp';
+  }
+  if (id.includes('dsn') || id.includes('carrier') || type.includes('telecom') || type.includes('loss-of-signal')) {
     return './flight-kit/anomaly-dsn-blackout.webp';
   }
-  if (key.includes('meteor') || key.includes('debris') || key.includes('star-tracker') || key.includes('impact') || key.includes('harness')) {
+  if (id.includes('micrometeoroid') || id.includes('debris') || type.includes('hull')) {
     return './flight-kit/anomaly-micrometeoroid.webp';
   }
-  return './flight-kit/anomaly-solar-flare.webp';
+  if (id.includes('harness') || id.includes('electrical') || type.includes('power')) {
+    return './flight-kit/anomaly-cryo-leak.webp';
+  }
+
+  return './flight-kit/crisis-solar-storm.webp';
 };
 
 export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
@@ -808,6 +826,22 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
         {/* ================================================================= */}
         {flightStage === 'design' && (
           <div className="max-w-4xl w-full border border-white/10 rounded-2xl bg-[#0E1422]/95 backdrop-blur-md p-6 md:p-8 space-y-6 shadow-2xl">
+            {/* Cinematic Launchpad Banner */}
+            <div className="relative w-full h-36 sm:h-48 rounded-xl overflow-hidden border border-white/10 bg-[#080C14]">
+              <img
+                src="./flight-kit/sim-launchpad-night.webp"
+                alt="Cape Canaveral Launch Complex at Night"
+                className="w-full h-full object-cover object-center"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/30 to-transparent" />
+              <div className="absolute bottom-3 left-4 flex items-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[11px] font-mono font-bold text-white uppercase tracking-wider drop-shadow-md">
+                  {currentVehicle.name} · {currentScenario.name}
+                </span>
+              </div>
+            </div>
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
               <div>
                 <span className="text-[10px] font-mono tracking-widest text-sky-400 uppercase font-bold">

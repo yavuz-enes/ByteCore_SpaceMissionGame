@@ -7,6 +7,15 @@ import {
 } from '../../i18n/missionsLocale';
 import { TRANSLATIONS } from '../../i18n/translations';
 
+const INSTRUMENT_ARTWORK: Record<string, string> = {
+  'inst-camera-hires': './flight-kit/sci-multispectral-cam.webp',
+  'inst-spectrometer-ir': './flight-kit/sci-thermal-ir.webp',
+  'inst-radar-subsurface': './flight-kit/sci-laser-altimeter.webp',
+  'inst-magnetometer': './flight-kit/sci-magnetometer.webp',
+  'inst-mass-spec': './flight-kit/sci-mass-spec.webp',
+  'inst-neutron-detector': './flight-kit/sci-gamma-neutron.webp',
+};
+
 export const ScientistConsole: React.FC = () => {
   const {
     missionState,
@@ -116,6 +125,19 @@ export const ScientistConsole: React.FC = () => {
                 }`}
               >
                 <div>
+                  <div className="relative w-full h-28 rounded-xl overflow-hidden border border-white/10 mb-2.5 bg-[#080C14]">
+                    <img
+                      src={INSTRUMENT_ARTWORK[inst.id] || './flight-kit/sci-laser-altimeter.webp'}
+                      alt={inst.name}
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
+                    <span className="absolute bottom-1.5 left-2 px-1.5 py-0.5 rounded text-[8px] font-mono bg-black/60 text-sky-300 border border-sky-400/20 backdrop-blur-sm">
+                      {inst.category}
+                    </span>
+                  </div>
+
                   <div className="flex items-start justify-between">
                     <div>
                       <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">

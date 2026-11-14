@@ -24,11 +24,11 @@ import {
 } from '../../data/academyContent';
 
 const MODULE_ARTWORK: Record<StandaloneModuleId, string> = {
-  'delta-v': './flight-kit/module-delta-v.webp',
-  'solar-thermal': './flight-kit/module-solar-flux.webp',
-  'deep-space-comm': './flight-kit/module-dsn-comm.webp',
-  'radiation-environment': './flight-kit/module-radiation.webp',
-  'subsystem-tradeoffs': './flight-kit/module-tradeoffs.webp',
+  'delta-v': './flight-kit/acad-diagram-deltav.webp',
+  'solar-thermal': './flight-kit/acad-diagram-solarflux.webp',
+  'deep-space-comm': './flight-kit/acad-diagram-linkbudget.webp',
+  'radiation-environment': './flight-kit/acad-diagram-radiation.webp',
+  'subsystem-tradeoffs': './flight-kit/acad-diagram-swapc.webp',
 };
 
 export const SpaceAcademyStandalone: React.FC = () => {

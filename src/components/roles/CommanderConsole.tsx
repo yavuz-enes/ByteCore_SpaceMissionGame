@@ -8,6 +8,26 @@ import {
 } from '../../i18n/missionsLocale';
 import { TRANSLATIONS } from '../../i18n/translations';
 
+const ORBIT_DIAGRAMS: Record<string, string> = {
+  'orbit-lunar-polar': './flight-kit/orbit-lunar-polar.webp',
+  'orbit-mars-low': './flight-kit/orbit-mars-sunsync.webp',
+  'orbit-mars-sunsync': './flight-kit/orbit-mars-sunsync.webp',
+  'orbit-europa-flyby': './flight-kit/orbit-europa-resonance.webp',
+  'orbit-europa-resonance': './flight-kit/orbit-europa-resonance.webp',
+  'orbit-asteroid-halo': './flight-kit/orbit-psyche-spiral.webp',
+  'orbit-psyche-spiral': './flight-kit/orbit-psyche-spiral.webp',
+  'orbit-leo-science': './flight-kit/orbit-lunar-polar.webp',
+};
+
+const ROCKET_RENDERS: Record<string, string> = {
+  'rocket-electron': './flight-kit/rocket-electron.webp',
+  'rocket-falcon9': './flight-kit/rocket-falcon-heavy.webp',
+  'rocket-falcon-heavy': './flight-kit/rocket-falcon-heavy.webp',
+  'rocket-sls': './flight-kit/rocket-sls-block1.webp',
+  'rocket-starship': './flight-kit/rocket-starship.webp',
+  'rocket-vulcan': './flight-kit/rocket-vulcan-centaur.webp',
+};
+
 export const CommanderConsole: React.FC = () => {
   const {
     missionState,
@@ -84,6 +104,20 @@ export const CommanderConsole: React.FC = () => {
                 }`}
               >
                 <div>
+                  {/* Technical Orbit Holographic Diagram */}
+                  <div className="relative w-full h-24 rounded-xl overflow-hidden mb-2.5 bg-[#080C14] border border-white/10">
+                    <img
+                      src={ORBIT_DIAGRAMS[orbit.id] || './flight-kit/orbit-lunar-polar.webp'}
+                      alt={orbit.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
+                    <span className="absolute bottom-1.5 left-2 text-[9px] font-mono text-sky-300 font-semibold uppercase">
+                      {orbit.altitudeKm} km · {orbit.inclinationDeg}°
+                    </span>
+                  </div>
+
                   <div className="flex items-start justify-between">
                     <h4 className="font-display font-bold text-sm text-white">
                       {orbit.name}
@@ -150,6 +184,20 @@ export const CommanderConsole: React.FC = () => {
                 }`}
               >
                 <div>
+                  {/* Studio Rocket Engineering Render */}
+                  <div className="relative w-full h-28 rounded-xl overflow-hidden mb-2.5 bg-[#080C14] border border-white/10">
+                    <img
+                      src={ROCKET_RENDERS[rocket.id] || './flight-kit/rocket-falcon-heavy.webp'}
+                      alt={rocket.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
+                    <span className="absolute top-1.5 left-2 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-black/75 backdrop-blur-md border border-white/20 text-sky-300">
+                      {rocket.stages} {isTr ? 'KADEMELİ' : 'STAGES'}
+                    </span>
+                  </div>
+
                   <div className="flex items-start justify-between">
                     <div>
                       <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">

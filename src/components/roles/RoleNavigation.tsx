@@ -5,7 +5,7 @@ import { PlayerRole, MissionStationRole } from '../../types/mission';
 import { TRANSLATIONS } from '../../i18n/translations';
 
 const ROLE_AVATARS: Record<MissionStationRole, string> = {
-  commander: './flight-kit/avatar-commander.png',
+  commander: './flight-kit/avatar-commander-hd.webp',
   engineer: './flight-kit/avatar-engineer.png',
   scientist: './flight-kit/avatar-scientist.png',
   comms: './flight-kit/avatar-comms.png',

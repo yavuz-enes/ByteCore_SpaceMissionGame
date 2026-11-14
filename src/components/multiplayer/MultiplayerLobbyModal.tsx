@@ -15,17 +15,20 @@ import { TRANSLATIONS } from '../../i18n/translations';
 import { getLocalizedScenarios, TARGET_TRANSLATIONS } from '../../i18n/missionsLocale';
 
 const ROLE_AVATARS: Record<MissionStationRole, string> = {
-  commander: './flight-kit/avatar-commander.png',
+  commander: './flight-kit/avatar-commander-hd.webp',
   engineer: './flight-kit/avatar-engineer.png',
   scientist: './flight-kit/avatar-scientist.png',
   comms: './flight-kit/avatar-comms.png',
 };
 
 const DESTINATION_ARTWORK: Record<string, string> = {
-  'lunar-recon': './flight-kit/card-moon-shackleton.webp',
-  'mars-recon': './flight-kit/card-mars-valles.webp',
-  'europa-recon': './flight-kit/card-europa-ice.webp',
-  'asteroid-scout': './flight-kit/card-asteroid-psyche.webp',
+  'lunar-recon': './flight-kit/scenario-moon-shackleton.webp',
+  'mars-recon': './flight-kit/scenario-mars-valles.webp',
+  'mars-sample': './flight-kit/scenario-mars-valles.webp',
+  'europa-recon': './flight-kit/scenario-europa-ice.webp',
+  'europa-ice': './flight-kit/scenario-europa-ice.webp',
+  'europa-explorer': './flight-kit/scenario-europa-ice.webp',
+  'asteroid-scout': './flight-kit/scenario-asteroid-psyche.webp',
 };
 
 interface MultiplayerLobbyModalProps {

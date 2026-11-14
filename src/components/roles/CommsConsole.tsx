@@ -8,6 +8,19 @@ import {
 import { SCIENTIFIC_INSTRUMENTS } from '../../data/missions';
 import { TRANSLATIONS } from '../../i18n/translations';
 
+const ANTENNA_ARTWORK: Record<string, string> = {
+  'ant-omni': './flight-kit/comm-omni-uhf.webp',
+  'ant-horn': './flight-kit/comm-patch-array.webp',
+  'ant-dish-hga': './flight-kit/comm-dish-xka.webp',
+  'ant-laser': './flight-kit/comm-optical-laser.webp',
+};
+
+const GROUND_STATION_ARTWORK: Record<string, string> = {
+  'ground-polar': './flight-kit/ground-commercial-satnet.webp',
+  'ground-dsn': './flight-kit/ground-nasa-dsn.webp',
+  'ground-relay': './flight-kit/ground-esa-estrack.webp',
+};
+
 export const CommsConsole: React.FC = () => {
   const {
     missionState,
@@ -135,6 +148,19 @@ export const CommsConsole: React.FC = () => {
                 }`}
               >
                 <div>
+                  <div className="relative w-full h-28 rounded-xl overflow-hidden border border-white/10 mb-2.5 bg-[#080C14]">
+                    <img
+                      src={ANTENNA_ARTWORK[ant.id] || './flight-kit/comm-dish-xka.webp'}
+                      alt={ant.name}
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
+                    <span className="absolute bottom-1.5 left-2 px-1.5 py-0.5 rounded text-[8px] font-mono bg-black/60 text-sky-300 border border-sky-400/20 backdrop-blur-sm">
+                      {ant.frequencyBand}
+                    </span>
+                  </div>
+
                   <div className="flex items-start justify-between">
                     <div>
                       <span className="text-[9px] font-mono text-slate-400 uppercase tracking-wider block">{ant.frequencyBand}</span>
@@ -215,6 +241,19 @@ export const CommsConsole: React.FC = () => {
                 }`}
               >
                 <div>
+                  <div className="relative w-full h-28 rounded-xl overflow-hidden border border-white/10 mb-2.5 bg-[#080C14]">
+                    <img
+                      src={GROUND_STATION_ARTWORK[ground.id] || './flight-kit/ground-nasa-dsn.webp'}
+                      alt={ground.name}
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
+                    <span className="absolute bottom-1.5 left-2 px-1.5 py-0.5 rounded text-[8px] font-mono bg-black/60 text-emerald-300 border border-emerald-400/20 backdrop-blur-sm">
+                      {ground.coveragePercent}% {isTr ? 'Kapsama' : 'Coverage'}
+                    </span>
+                  </div>
+
                   <div className="flex items-start justify-between">
                     <h4 className="font-display font-bold text-sm text-white">{ground.name}</h4>
                     {isSelected ? (
