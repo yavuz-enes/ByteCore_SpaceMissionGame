@@ -14,10 +14,10 @@ import {
   Zap,
   Check,
   BookOpen,
+  Rocket,
 } from 'lucide-react';
 import { useMissionStore } from '../../store/missionStore';
 import {
-  getStandaloneDiagQuestions,
   getStandaloneModules,
   getAcademyUI,
   StandaloneModuleId,
@@ -32,22 +32,11 @@ const MODULE_ARTWORK: Record<StandaloneModuleId, string> = {
 };
 
 export const SpaceAcademyStandalone: React.FC = () => {
-  const { locale, closeAcademy, startSoloMission } = useMissionStore();
+  const { locale, setLocale, closeAcademy, startSoloMission } = useMissionStore();
   const isTr = locale === 'tr';
 
-  const diagQuestions = getStandaloneDiagQuestions(locale);
   const modules = getStandaloneModules(locale);
   const ui = getAcademyUI(locale);
-
-  // Diagnostic Pre-Assessment State
-  const [hasCompletedPreTest, setHasCompletedPreTest] = useState(false);
-  const [preTestStep, setPreTestStep] = useState(0);
-  const [preTestAnswers, setPreTestAnswers] = useState<Record<string, string>>({});
-  const [preTestResult, setPreTestResult] = useState<{
-    score: number;
-    passedModules: StandaloneModuleId[];
-    failedModules: StandaloneModuleId[];
-  } | null>(null);
 
   // Active Module & Curriculum State
   const [activeModuleId, setActiveModuleId] = useState<StandaloneModuleId>('delta-v');
@@ -104,43 +93,6 @@ export const SpaceAcademyStandalone: React.FC = () => {
       utteranceRef.current = utterance;
       window.speechSynthesis.speak(utterance);
       setIsSpeaking(true);
-    }
-  };
-
-  // Pre-test Answer Handler
-  const handleAnswerPreTest = (optionId: string) => {
-    const q = diagQuestions[preTestStep];
-    const newAnswers = { ...preTestAnswers, [q.id]: optionId };
-    setPreTestAnswers(newAnswers);
-
-    if (preTestStep < diagQuestions.length - 1) {
-      setPreTestStep(preTestStep + 1);
-    } else {
-      // Evaluate results
-      let score = 0;
-      const passed: StandaloneModuleId[] = [];
-      const failed: StandaloneModuleId[] = [];
-
-      diagQuestions.forEach((quest) => {
-        const ans = newAnswers[quest.id];
-        const opt = quest.options.find((o) => o.id === ans);
-        if (opt?.isCorrect) {
-          score += 1;
-          passed.push(quest.moduleId);
-        } else {
-          failed.push(quest.moduleId);
-        }
-      });
-
-      setPreTestResult({ score, passedModules: passed, failedModules: failed });
-      setHasCompletedPreTest(true);
-
-      // Automatically focus on the first failed module for remediation, or first module
-      if (failed.length > 0) {
-        setActiveModuleId(failed[0]);
-      } else {
-        setActiveModuleId('delta-v');
-      }
     }
   };
 
@@ -229,47 +181,75 @@ export const SpaceAcademyStandalone: React.FC = () => {
       <div className="fixed inset-0 bg-[#0B0F17]/35 pointer-events-none -z-10" />
 
       {/* --------------------------------------------------------------------- */}
-      {/* TOP HEADER: ACADEMY CAMPUS COMMAND                                   */}
+      {/* TOP HEADER: GLOBAL NAVIGATION BAR (MATCHES LANDING PAGE)              */}
       {/* --------------------------------------------------------------------- */}
-      <header className="w-full bg-[#0B0F17]/95 backdrop-blur-md border-b border-white/10 px-4 sm:px-6 py-3 sticky top-0 z-40">
-        <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-3">
-          {/* Left Brand and Return Action */}
-          <div className="flex items-center space-x-3">
+      <header className="sticky top-0 z-40 w-full bg-[#0B0F17]/90 border-b border-white/10 backdrop-blur-md px-4 md:px-8 py-3.5">
+        <div className="max-w-[1360px] mx-auto flex items-center justify-between gap-4">
+          {/* Brand */}
+          <button
+            onClick={closeAcademy}
+            className="flex items-center space-x-3 group cursor-pointer text-left"
+            title="ByteCore Home"
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.5)] group-hover:scale-125 transition-transform" />
+            <span className="font-display font-semibold text-lg md:text-xl tracking-tight text-white group-hover:text-sky-300 transition-colors">
+              BYTECORE
+            </span>
+          </button>
+
+          {/* Nav Links */}
+          <nav className="hidden lg:flex items-center space-x-6 text-xs font-mono text-slate-400">
             <button
               onClick={closeAcademy}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full border border-slate-700/80 bg-slate-900/60 hover:bg-slate-800 text-xs font-mono text-slate-300 hover:text-white transition-all cursor-pointer"
-              title={ui.returnHome}
+              className="hover:text-white text-slate-400 transition-colors cursor-pointer"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{ui.returnHome}</span>
+              {isTr ? 'LOBİ' : 'LOBBY'}
             </button>
-
-            <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
-              <span className="font-display font-bold text-sm sm:text-base tracking-tight text-white">
-                {ui.campusTitle}
-              </span>
-            </div>
-          </div>
-
-          {/* Right Status & Launch Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            {/* Certification Status Pill */}
-            <div className="hidden md:flex items-center space-x-2 px-3.5 py-1 rounded-full border border-slate-800 bg-[#0E1422] text-xs font-mono">
-              <Award className={`w-3.5 h-3.5 ${isAllMastered ? 'text-emerald-400' : 'text-sky-400'}`} />
-              <span className="text-slate-400">{ui.competencyLabel}:</span>
-              <strong className={isAllMastered ? 'text-emerald-400 font-bold' : 'text-white'}>
-                {masteredModules.size} / {modules.length} {ui.modulesCount}
-              </strong>
-            </div>
-
-            {/* Launch Mission CTA */}
+            <span className="text-sky-400 font-semibold flex items-center space-x-1 cursor-default">
+              <Award className="w-3.5 h-3.5 text-sky-400" />
+              <span>{isTr ? 'EĞİTİME GİR' : 'ACADEMY'}</span>
+            </span>
             <button
-              onClick={startSoloMission}
-              className="flex items-center space-x-1.5 px-4 py-1.5 rounded-full bg-white text-slate-950 hover:bg-slate-100 font-semibold text-xs transition-all cursor-pointer shadow-sm"
+              onClick={closeAcademy}
+              className="hover:text-white text-slate-400 transition-colors cursor-pointer"
             >
-              <Play className="w-3.5 h-3.5 fill-current" />
-              <span>{ui.startMission}</span>
+              {isTr ? 'BYTECORE EKİBİ' : 'BYTECORE TEAM'}
+            </button>
+          </nav>
+
+          {/* Right Controls: Language Selector & Launch CTA */}
+          <div className="flex items-center space-x-3">
+            {/* Language Selector */}
+            <div className="flex items-center space-x-1 bg-slate-900/80 border border-slate-700/80 p-0.5 rounded-full font-mono text-xs">
+              <button
+                onClick={() => setLocale('en')}
+                className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                  locale === 'en'
+                    ? 'bg-white text-slate-950 font-semibold shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                EN
+              </button>
+              <button
+                onClick={() => setLocale('tr')}
+                className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${
+                  locale === 'tr'
+                    ? 'bg-white text-slate-950 font-semibold shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                TR
+              </button>
+            </div>
+
+            {/* Quick Launch CTA */}
+            <button
+              onClick={closeAcademy}
+              className="flex items-center space-x-2 bg-white text-slate-950 hover:bg-slate-100 font-semibold text-xs md:text-sm px-4 md:px-5 py-2 rounded-full shadow-sm transition-all cursor-pointer font-mono"
+            >
+              <Rocket className="w-3.5 h-3.5" />
+              <span>{isTr ? 'GÖREV LOBİSİ' : 'EXPEDITION LOBBY'}</span>
             </button>
           </div>
         </div>
@@ -279,174 +259,37 @@ export const SpaceAcademyStandalone: React.FC = () => {
       {/* MAIN ACADEMY BODY                                                     */}
       {/* --------------------------------------------------------------------- */}
       <main className="relative z-10 flex-1 max-w-[1400px] w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
-        {/* ----------------------------------------------------------------- */}
-        {/* GATE 1: MANDATORY DIAGNOSTIC PRE-TEST (ÖN TEST TAMAMLANMADAN KİLİTLİ) */}
-        {/* ----------------------------------------------------------------- */}
-        {!hasCompletedPreTest ? (
-          <div className="max-w-3xl mx-auto my-6 border-2 border-sky-400/50 rounded-2xl overflow-hidden bg-[#0E1422]/95 backdrop-blur-md shadow-[0_0_35px_rgba(56,189,248,0.2)] p-6 sm:p-8 space-y-6">
-            <div className="space-y-2 border-b border-white/10 pb-4">
-              <div className="flex items-center justify-between">
-                <span className="px-3 py-1 rounded-full text-xs font-mono border border-sky-400/60 bg-sky-500/20 text-sky-200 font-bold uppercase tracking-wider">
-                  {ui.gateBadge}
-                </span>
-                <span className="text-xs font-mono text-slate-300 font-semibold">
-                  {ui.questionStep} {preTestStep + 1} / {diagQuestions.length}
-                </span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-display font-bold text-white">
-                {ui.preTestTitle}
-              </h2>
-              <p className="text-slate-300 text-xs sm:text-sm font-mono leading-relaxed">
-                {ui.preTestDesc}
-              </p>
-            </div>
+        <div className="space-y-6">
+          {/* Module Selector Navigation Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {modules.map((mod) => {
+              const isActive = activeModuleId === mod.id;
+              const isMastered = masteredModules.has(mod.id);
+              const ModIcon = mod.icon;
 
-            {/* Pre-test Progress Bar */}
-            <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-white/10">
-              <div
-                className="bg-sky-400 h-full transition-all duration-300 shadow-[0_0_10px_rgba(56,189,248,0.5)]"
-                style={{
-                  width: `${((preTestStep + 1) / diagQuestions.length) * 100}%`,
-                }}
-              />
-            </div>
-
-            {/* Question Text */}
-            <div className="space-y-4 pt-2">
-              <p className="text-base sm:text-lg font-semibold text-white leading-snug">
-                {diagQuestions[preTestStep].question}
-              </p>
-
-              {/* Options */}
-              <div className="space-y-3 font-mono">
-                {diagQuestions[preTestStep].options.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => handleAnswerPreTest(option.id)}
-                    className="w-full text-left p-4 rounded-xl border border-slate-700/80 bg-[#131D31] hover:bg-[#1A2844] hover:border-sky-400 text-xs sm:text-sm text-slate-100 hover:text-white transition-all cursor-pointer flex items-center justify-between group shadow-sm active:scale-[0.99]"
-                  >
-                    <span className="font-medium text-slate-100 group-hover:text-white leading-relaxed">{option.text}</span>
-                    <ArrowRight className="w-4 h-4 text-sky-400 group-hover:translate-x-1 transition-all shrink-0 ml-2" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Pre-Test Evaluation Card */
-          preTestResult && (
-            <div className="border border-white/10 rounded-2xl overflow-hidden p-5 sm:p-6 bg-[#0E1422] space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
-                <div className="flex items-center space-x-2.5">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                  <div>
-                    <h3 className="font-display font-bold text-white text-base">
-                      {ui.preTestCompletedTitle}
-                    </h3>
-                    <span className="text-xs font-mono text-slate-400">
-                      {ui.preTestScore}: <strong className="text-emerald-300">{preTestResult.score} / {diagQuestions.length} {ui.correctLabel}</strong>
-                    </span>
-                  </div>
-                </div>
-
+              return (
                 <button
-                  onClick={() => {
-                    setHasCompletedPreTest(false);
-                    setPreTestStep(0);
-                    setPreTestAnswers({});
-                    setPreTestResult(null);
-                  }}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full border border-slate-700 hover:border-slate-500 text-xs font-mono text-slate-400 hover:text-white transition-all cursor-pointer w-fit"
+                  key={mod.id}
+                  onClick={() => setActiveModuleId(mod.id)}
+                  className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                    isActive
+                      ? 'border-sky-400 bg-sky-500/15 shadow-md shadow-sky-500/10'
+                      : isMastered
+                      ? 'border-emerald-500/40 bg-emerald-500/5 hover:border-emerald-400'
+                      : 'border-slate-800 bg-[#0E1422] hover:border-slate-700'
+                  }`}
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>{ui.retakeTest}</span>
-                </button>
-              </div>
-
-              {/* Identified Strengths and Remediation Gaps */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
-                <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 space-y-1.5">
-                  <span className="text-emerald-400 font-bold block uppercase text-[10px]">
-                    {ui.strongConcepts}
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {preTestResult.passedModules.length > 0 ? (
-                      preTestResult.passedModules.map((mId) => (
-                        <span key={mId} className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px]">
-                          ✓ {modules.find((m) => m.id === mId)?.title.split(' ')[0]}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-slate-400 text-[11px]">-</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-1.5">
-                  <span className="text-amber-400 font-bold block uppercase text-[10px]">
-                    {ui.requiredModules}
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {preTestResult.failedModules.length > 0 ? (
-                      preTestResult.failedModules.map((mId) => (
-                        <span key={mId} className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[11px]">
-                          ! {modules.find((m) => m.id === mId)?.title.split(' ')[0]}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-emerald-400 text-[11px]">
-                        {isTr ? 'Tüm modüllerde tam yeterlilik sağlandı' : 'Full baseline mastery verified'}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <ModIcon className={`w-4 h-4 ${isActive ? 'text-sky-300' : isMastered ? 'text-emerald-400' : 'text-slate-400'}`} />
+                      <span className="text-[10px] font-mono text-slate-400 uppercase font-bold">
+                        {mod.index}
                       </span>
+                    </div>
+                    {isMastered && (
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
                     )}
                   </div>
-                </div>
-              </div>
-            </div>
-          )
-        )}
-
-        {/* ----------------------------------------------------------------- */}
-        {/* GATE 2: INTERACTIVE LEARNING LABS & SIMULATORS (Unlocked)         */}
-        {/* ----------------------------------------------------------------- */}
-        {hasCompletedPreTest && (
-          <div className="space-y-6">
-            {/* Module Selector Navigation Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              {modules.map((mod) => {
-                const isActive = activeModuleId === mod.id;
-                const isMastered = masteredModules.has(mod.id);
-                const isPriority = preTestResult?.failedModules.includes(mod.id);
-                const ModIcon = mod.icon;
-
-                return (
-                  <button
-                    key={mod.id}
-                    onClick={() => setActiveModuleId(mod.id)}
-                    className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
-                      isActive
-                        ? 'border-sky-400 bg-sky-500/15 shadow-md shadow-sky-500/10'
-                        : isMastered
-                        ? 'border-emerald-500/40 bg-emerald-500/5 hover:border-emerald-400'
-                        : isPriority
-                        ? 'border-amber-500/40 bg-amber-500/5 hover:border-amber-400'
-                        : 'border-slate-800 bg-[#0E1422] hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <ModIcon className={`w-4 h-4 ${isActive ? 'text-sky-300' : isMastered ? 'text-emerald-400' : 'text-slate-400'}`} />
-                        <span className="text-[10px] font-mono text-slate-400 uppercase font-bold">
-                          {mod.index}
-                        </span>
-                      </div>
-                      {isMastered ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      ) : isPriority ? (
-                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300">
-                          {isTr ? 'ÖNCELİKLİ' : 'PRIORITY'}
-                        </span>
-                      ) : null}
-                    </div>
 
                     <div>
                       <h4 className="text-xs font-display font-bold text-white line-clamp-1">
@@ -1009,7 +852,6 @@ export const SpaceAcademyStandalone: React.FC = () => {
               </div>
             )}
           </div>
-        )}
       </main>
     </div>
   );

@@ -32,7 +32,6 @@ import { useMissionStore } from '../../store/missionStore';
 import { useSiteContent } from '../../hooks/useSiteContent';
 import { MissionId, PlayerRole } from '../../types/mission';
 import { multiplayerService } from '../../services/multiplayerService';
-import { NASAOfficialResourcesModal } from '../layout/NASAOfficialResourcesModal';
 
 const DESTINATION_ARTWORK: Record<string, string> = {
   'lunar-recon': './flight-kit/card-moon-shackleton.webp',
@@ -82,7 +81,6 @@ export const LandingPage: React.FC = () => {
   const [joinRoomCode, setJoinRoomCode] = useState('');
   const [connectingAction, setConnectingAction] = useState<'host' | 'join' | null>(null);
   const [copied, setCopied] = useState(false);
-  const [isResourcesModalOpen, setIsResourcesModalOpen] = useState(false);
 
   // Handle Copy Code
   const handleCopyCode = () => {
@@ -185,10 +183,6 @@ export const LandingPage: React.FC = () => {
               <Award className="w-3.5 h-3.5 text-sky-400" />
               <span>{isTr ? 'EĞİTİME GİR' : 'ACADEMY'}</span>
             </button>
-            <a href="#sources" className="hover:text-white transition-colors flex items-center space-x-1">
-              <BookOpen className="w-3.5 h-3.5 text-sky-400" />
-              <span>{isTr ? 'NASA / CSA KAYNAKLARI' : 'NASA/CSA SOURCES'}</span>
-            </a>
             <a href="#team" className="hover:text-white transition-colors">
               {isTr ? 'BYTECORE EKİBİ' : 'BYTECORE TEAM'}
             </a>
@@ -251,14 +245,6 @@ export const LandingPage: React.FC = () => {
 
           {/* Hero CTAs */}
           <div className="pt-4 flex flex-wrap items-center justify-center gap-3">
-            <button
-              onClick={openAcademy}
-              className="px-6 py-3 rounded-full bg-sky-500/10 border border-sky-400/40 hover:border-sky-300 text-sky-300 hover:text-white hover:bg-sky-500/20 font-semibold text-xs md:text-sm tracking-wider shadow-sm transition-all flex items-center space-x-2 cursor-pointer font-mono"
-            >
-              <Award className="w-4 h-4 text-sky-400" />
-              <span>{isTr ? 'EĞİTİME GİR (UZAY AKADEMİSİ)' : 'ENTER ACADEMY (SPACE ACADEMY)'}</span>
-            </button>
-
             <a
               href="#lobby"
               className="px-6 py-3 rounded-full bg-white text-slate-950 hover:bg-slate-100 font-semibold text-xs md:text-sm tracking-wider shadow-sm transition-all flex items-center space-x-2"
@@ -274,38 +260,6 @@ export const LandingPage: React.FC = () => {
               <Play className="w-4 h-4" />
               <span>{content.site.soloExploreBtn}</span>
             </button>
-          </div>
-
-          {/* Official NASA & CSA Competition Sources Verified Trust Ribbon */}
-          <div className="pt-4 max-w-4xl mx-auto">
-            <div className="p-3 sm:p-3.5 rounded-2xl border border-sky-500/25 bg-slate-900/70 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono shadow-[0_0_20px_rgba(56,189,248,0.1)]">
-              <div className="flex items-center space-x-2 text-sky-400">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span className="font-semibold text-white">
-                  {isTr ? 'Yarışma Kaynakları Doğrulandı:' : 'Challenge Sources Integrated:'}
-                </span>
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-[11px] text-slate-300">
-                <span className="px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 hover:border-sky-400/50 transition-colors">
-                  1. NASA Webb Satellite
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 hover:border-sky-400/50 transition-colors">
-                  2. NASA Mission-Viz
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 hover:border-sky-400/50 transition-colors">
-                  3. Space Apps VR 2023
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 hover:border-sky-400/50 transition-colors">
-                  4. CSA Digital Games
-                </span>
-              </div>
-              <button
-                onClick={() => setIsResourcesModalOpen(true)}
-                className="text-[11px] text-sky-400 hover:text-sky-300 underline font-semibold cursor-pointer whitespace-nowrap"
-              >
-                {isTr ? 'Kaynak Raporu →' : 'View Citations →'}
-              </button>
-            </div>
           </div>
         </div>
       </section>
@@ -328,20 +282,6 @@ export const LandingPage: React.FC = () => {
               <div>
                 <span className="text-xs font-mono font-semibold tracking-wider text-slate-300 uppercase">
                   {isTr ? 'GÖREV HEDEFLERİ' : 'MISSION TARGETS'}
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  type="button"
-                  onClick={openAcademy}
-                  className="text-[11px] font-mono text-sky-400 hover:text-sky-300 transition-colors flex items-center space-x-1 cursor-pointer"
-                  title={isTr ? 'Ön test ve uzay fiziği eğitimleri' : 'Pre-test and aerospace physics training'}
-                >
-                  <Award className="w-3.5 h-3.5" />
-                  <span>{isTr ? 'Uçuş Akademisi' : 'Flight Academy'}</span>
-                </button>
-                <span className="text-[11px] font-mono text-emerald-400 font-medium">
-                  {isTr ? 'Sefer Planı' : 'Campaign'}: {destinations.length}/2 {isTr ? 'Hedef' : 'Target(s)'}
                 </span>
               </div>
             </div>
@@ -922,11 +862,6 @@ export const LandingPage: React.FC = () => {
             <h2 className="text-3xl md:text-4xl font-display font-medium text-white">
               {isTr ? 'Uçuş Öncesi Sistem Mühendisliği Eğitimi' : 'Pre-Flight Aerospace Systems Training'}
             </h2>
-            <p className="text-slate-400 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed font-mono">
-              {isTr
-                ? 'Tsiolkovsky roket dinamiği, ters kare güneş ışınımı, DSN radyo iletişimi, radyasyon kalkanı ve alt sistem optimizasyonunu etkileşimli simülatörler ve sesli anlatımla keşfedin.'
-                : 'Master Tsiolkovsky orbital mechanics, inverse-square solar flux, Deep Space Network attenuation, radiation shielding, and subsystem trades through interactive simulators and voice narration.'}
-            </p>
           </div>
 
           {/* 5 Module Artwork Cards Grid */}
@@ -1005,199 +940,6 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ------------------------------------------------------------------------- */}
-      {/* 4.5 OFFICIAL NASA & CSA COMPETITION SOURCES & SCIENTIFIC BASIS */}
-      {/* ------------------------------------------------------------------------- */}
-      <section id="sources" className="py-16 border-b border-white/10 relative z-10 bg-[#080C14]/90">
-        <div className="max-w-[1360px] mx-auto px-4 md:px-8 space-y-8">
-          {/* Section Header */}
-          <div className="text-center space-y-2">
-            <div className="text-sky-400 text-[11px] font-mono tracking-widest uppercase flex items-center justify-center space-x-1.5">
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>{isTr ? 'RESMİ YARIŞMA ARAŞTIRMA KAYNAKLARI' : 'OFFICIAL CHALLENGE RESEARCH SOURCES'}</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-display font-medium text-white">
-              {isTr ? 'Yarışmada Verilen Kaynaklar & Mühendislik Temelleri' : 'Challenge-Provided Sources & Aerospace Engineering'}
-            </h2>
-            <p className="text-slate-400 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed font-mono">
-              {isTr
-                ? 'ByteCore uzay simülatörü, NASA Space Apps Challenge tarafından sağlanan resmi araştırma portalları ve NASA/JPL/CSA sistem mühendisliği el kitapları temel alınarak inşa edilmiştir.'
-                : 'ByteCore simulator is built strictly upon the official challenge research portals and NASA/JPL/CSA systems engineering standards.'}
-            </p>
-          </div>
-
-          {/* 4 Official Challenge Resources Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Source 1: NASA Webb Build It Yourself */}
-            <div className="p-4 rounded-2xl border border-amber-500/30 bg-[#0E1422] flex flex-col justify-between space-y-3 hover:border-amber-400/60 transition-all">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300 uppercase">
-                    {isTr ? 'YARIŞMA KAYNAĞI 1' : 'CHALLENGE SOURCE 1'}
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-400">NASA GSFC</span>
-                </div>
-                <h4 className="font-display font-medium text-sm text-white">
-                  NASA Webb "Build It Yourself: Satellite!"
-                </h4>
-                <div className="p-2 rounded-lg bg-[#080C14] border border-white/5 space-y-1">
-                  <span className="text-[9px] font-mono text-amber-400 font-semibold block uppercase">
-                    {isTr ? 'SİTEDEKİ KULLANIMI:' : 'USED IN SITE:'}
-                  </span>
-                  <p className="text-[10px] font-mono text-slate-300">
-                    {isTr ? 'Bilim Konsolu (Scientist) & Spektrometre Dalga Boyu Kilidi' : 'Scientist Console & Spectrometer Lock'}
-                  </p>
-                </div>
-                <p className="text-[11px] font-mono text-slate-400 leading-relaxed">
-                  {isTr
-                    ? 'Kızılötesi (NIR/MIR), Görünür ve X-Işını dalga boyu filtreleme mimarisi ve dedektör kısıtları bu kaynaktan alındı.'
-                    : 'Wavelength selection (NIR/MIR/Visible) and detector trade space derived from this tool.'}
-                </p>
-              </div>
-              <a
-                href="https://science.nasa.gov/mission/webb/game-build-it-yourself/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 hover:text-white transition-colors"
-              >
-                <span>{isTr ? 'Kaynağı Aç' : 'Open Link'}</span>
-                <ExternalLink className="w-3 h-3 text-slate-400" />
-              </a>
-            </div>
-
-            {/* Source 2: NASA Mission-Viz */}
-            <div className="p-4 rounded-2xl border border-sky-500/30 bg-[#0E1422] flex flex-col justify-between space-y-3 hover:border-sky-400/60 transition-all">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-sky-500/15 border border-sky-500/30 text-sky-300 uppercase">
-                    {isTr ? 'YARIŞMA KAYNAĞI 2' : 'CHALLENGE SOURCE 2'}
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-400">NASA Open Source</span>
-                </div>
-                <h4 className="font-display font-medium text-sm text-white">
-                  NASA Mission-Viz (3D Yörünge Simülatörü)
-                </h4>
-                <div className="p-2 rounded-lg bg-[#080C14] border border-white/5 space-y-1">
-                  <span className="text-[9px] font-mono text-sky-400 font-semibold block uppercase">
-                    {isTr ? 'SİTEDEKİ KULLANIMI:' : 'USED IN SITE:'}
-                  </span>
-                  <p className="text-[10px] font-mono text-slate-300">
-                    {isTr ? '3B Yörünge Sahnesi & Yer İstasyonu (DSN) Görüş Konisi' : '3D Orbit Simulation & Ground Station Cones'}
-                  </p>
-                </div>
-                <p className="text-[11px] font-mono text-slate-400 leading-relaxed">
-                  {isTr
-                    ? 'Keplerian yörünge yayları (a, e, i, Ω, ω, ν) ve yer istasyonu telemetri kapsama konileri bu araçtan uyarlandı.'
-                    : 'Keplerian orbital arcs and DSN ground station visibility footprint cones adapted from this framework.'}
-                </p>
-              </div>
-              <a
-                href="https://nasa.github.io/mission-viz/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 hover:text-white transition-colors"
-              >
-                <span>{isTr ? 'Kaynağı Aç' : 'Open Link'}</span>
-                <ExternalLink className="w-3 h-3 text-slate-400" />
-              </a>
-            </div>
-
-            {/* Source 3: NASA Space Apps Challenge VR */}
-            <div className="p-4 rounded-2xl border border-purple-500/30 bg-[#0E1422] flex flex-col justify-between space-y-3 hover:border-purple-400/60 transition-all">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-purple-500/15 border border-purple-500/30 text-purple-300 uppercase">
-                    {isTr ? 'YARIŞMA KAYNAĞI 3' : 'CHALLENGE SOURCE 3'}
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-400">Space Apps 2023</span>
-                </div>
-                <h4 className="font-display font-medium text-sm text-white">
-                  NASA Space Apps VR Space Mission Challenge
-                </h4>
-                <div className="p-2 rounded-lg bg-[#080C14] border border-white/5 space-y-1">
-                  <span className="text-[9px] font-mono text-purple-400 font-semibold block uppercase">
-                    {isTr ? 'SİTEDEKİ KULLANIMI:' : 'USED IN SITE:'}
-                  </span>
-                  <p className="text-[10px] font-mono text-slate-300">
-                    {isTr ? 'Görev Yaşam Döngüsü Zaman Çubuğu & Telemetri HUD' : 'Mission Timeline Scrubber & Telemetry HUD'}
-                  </p>
-                </div>
-                <p className="text-[11px] font-mono text-slate-400 leading-relaxed">
-                  {isTr
-                    ? 'Fırlatma, ayrılma, seyir ve yörüngeye giriş aşamalarının uzamsal canlandırması ve telemetri göstergeleri bu şartnameye dayanır.'
-                    : 'Phase-by-phase timeline scrubber, HUD gauges, and spatial camera perspectives stem from this challenge.'}
-                </p>
-              </div>
-              <a
-                href="https://www.spaceappschallenge.org/2023/challenges/visualize-a-space-mission-using-virtual-reality/?tab=details"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 hover:text-white transition-colors"
-              >
-                <span>{isTr ? 'Kaynağı Aç' : 'Open Link'}</span>
-                <ExternalLink className="w-3 h-3 text-slate-400" />
-              </a>
-            </div>
-
-            {/* Source 4: Canadian Space Agency Digital Activities */}
-            <div className="p-4 rounded-2xl border border-emerald-500/30 bg-[#0E1422] flex flex-col justify-between space-y-3 hover:border-emerald-400/60 transition-all">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 uppercase">
-                    {isTr ? 'YARIŞMA KAYNAĞI 4' : 'CHALLENGE SOURCE 4'}
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-400">ASC-CSA</span>
-                </div>
-                <h4 className="font-display font-medium text-sm text-white">
-                  CSA Dijital Oyunlar ve Aktiviteler
-                </h4>
-                <div className="p-2 rounded-lg bg-[#080C14] border border-white/5 space-y-1">
-                  <span className="text-[9px] font-mono text-emerald-400 font-semibold block uppercase">
-                    {isTr ? 'SİTEDEKİ KULLANIMI:' : 'USED IN SITE:'}
-                  </span>
-                  <p className="text-[10px] font-mono text-slate-300">
-                    {isTr ? 'Canadarm Kargo Bırakma & RADARSAT Radar Kilidi' : 'Canadarm Payload & RADARSAT Frequency'}
-                  </p>
-                </div>
-                <p className="text-[11px] font-mono text-slate-400 leading-relaxed">
-                  {isTr
-                    ? 'Kanada Uzay Ajansı robotik kol kargo yerleştirme dinamiği, RADARSAT frekans yönetimi ve Bennu iniş analizi uyarlandı.'
-                    : 'Canadarm robotic kinematics, RADARSAT SAR frequency mini-games, and Bennu surface hazard scouting.'}
-                </p>
-              </div>
-              <a
-                href="https://www.asc-csa.gc.ca/eng/youth-educators/digital-games-and-activities.asp"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center space-x-1 py-1.5 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-slate-300 hover:text-white transition-colors"
-              >
-                <span>{isTr ? 'Kaynağı Aç' : 'Open Link'}</span>
-                <ExternalLink className="w-3 h-3 text-slate-400" />
-              </a>
-            </div>
-          </div>
-
-          {/* Detailed Engineering Standards Citation Bar */}
-          <div className="p-4 rounded-2xl border border-white/10 bg-[#0E1422] flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="space-y-1">
-              <span className="text-[11px] font-mono text-sky-400 font-semibold uppercase flex items-center space-x-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{isTr ? 'Destekleyici Resmi NASA Standartları Dokümanları:' : 'Supporting Official NASA Engineering Handbooks:'}</span>
-              </span>
-              <p className="text-xs font-mono text-slate-400">
-                NASA Julie Levri (4 Görev Segmenti & NPR 7123.1), JPL CML 1-9 Matrisi, GSFC MDL 13 Disiplini, NASA CubeSat 101 CSLI Standartları.
-              </p>
-            </div>
-            <button
-              onClick={() => setIsResourcesModalOpen(true)}
-              className="px-5 py-2.5 rounded-full bg-sky-500/10 border border-sky-400/40 hover:bg-sky-500/20 text-sky-300 font-mono text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer"
-            >
-              {isTr ? 'Tüm Doküman ve Detayları Gör →' : 'View Full Documentation →'}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* ------------------------------------------------------------------------- */}
       {/* 5. TEAM PROFILE & MISSION STATEMENT */}
       {/* ------------------------------------------------------------------------- */}
       <section id="team" className="py-16 bg-[#0B0F17]/50 relative z-10">
@@ -1243,12 +985,6 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* NASA & CSA Official Challenge Resources Modal */}
-      <NASAOfficialResourcesModal
-        isOpen={isResourcesModalOpen}
-        onClose={() => setIsResourcesModalOpen(false)}
-      />
     </div>
   );
 };
