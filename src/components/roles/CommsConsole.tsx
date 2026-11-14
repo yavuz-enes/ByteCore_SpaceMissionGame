@@ -67,6 +67,35 @@ export const CommsConsole: React.FC = () => {
         </div>
       </div>
 
+      {/* Prominent Communication Bottleneck Error Notice */}
+      {isBottlenecked && (
+        <div className="p-4 border-2 border-rose-500/80 bg-rose-950/40 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono shadow-[0_0_20px_rgba(244,63,94,0.25)]">
+          <div className="flex items-start sm:items-center space-x-3">
+            <div className="w-8 h-8 rounded-full bg-rose-500/20 border border-rose-500 flex items-center justify-center shrink-0 text-rose-400 font-bold text-base animate-pulse">
+              !
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-rose-400 font-bold tracking-wider uppercase text-[11px]">
+                  {isTr ? 'KRİTİK HATA: İLETİŞİM DARBOĞAZI' : 'CRITICAL ERROR: COMMS BOTTLENECK'}
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[9px] bg-rose-500/20 border border-rose-500/40 text-rose-300 font-semibold">
+                  {isTr ? 'UÇUŞ KOPMA RİSKİ' : 'TELEMETRY LOSS RISK'}
+                </span>
+              </div>
+              <p className="text-rose-200/90 text-xs mt-1 leading-relaxed">
+                {isTr
+                  ? `Seçilen anten veya yer istasyonu bilim yükünün veri akış hızını karşılayamıyor (${throughputKbps} kbps < ${totalScienceDataRateKbps} kbps). Uçuş sırasında telemetri kaybı ve araç düşüşü gerçekleşir! Daha güçlü bir anten veya Deep Space Network (DSN) yer istasyonu seçin.`
+                  : `Selected antenna or ground station cannot meet instrument data stream rate (${throughputKbps} kbps < ${totalScienceDataRateKbps} kbps). Telemetry loss and flight crash will occur! Select a higher-gain antenna or Deep Space Network (DSN).`}
+              </p>
+            </div>
+          </div>
+          <div className="text-right shrink-0 font-bold text-rose-400 text-sm">
+            -{totalScienceDataRateKbps - throughputKbps} kbps
+          </div>
+        </div>
+      )}
+
       {/* 1. Antenna System Selection (Pruned) */}
       <div className="space-y-3">
         <div className="border-b border-white/10 pb-1.5 flex items-center justify-between">
@@ -217,23 +246,36 @@ export const CommsConsole: React.FC = () => {
       </div>
 
       {/* Live Bandwidth Balance Analysis (Condensed) */}
-      <div className="border border-white/10 rounded-2xl overflow-hidden p-4 font-mono text-xs space-y-3 bg-[#0E1422]">
+      <div
+        className={`border rounded-2xl overflow-hidden p-4 font-mono text-xs space-y-3 transition-colors ${
+          isBottlenecked
+            ? 'border-rose-500/80 bg-[#160B12] shadow-[0_0_15px_rgba(244,63,94,0.15)]'
+            : 'border-white/10 bg-[#0E1422]'
+        }`}
+      >
         <div className="flex items-center justify-between pb-2 border-b border-white/10">
-          <span className="text-white font-bold uppercase tracking-wider">
-            {t.throughputComparison}
+          <div className="flex items-center space-x-2">
+            {isBottlenecked && <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />}
+            <span className={`font-bold uppercase tracking-wider ${isBottlenecked ? 'text-rose-400' : 'text-white'}`}>
+              {t.throughputComparison} {isBottlenecked && (isTr ? '(KRİTİK HATA)' : '(CRITICAL ERROR)')}
+            </span>
+          </div>
+          <span className={isBottlenecked ? 'text-rose-400 font-bold' : 'text-slate-400'}>
+            {throughputKbps} / {totalScienceDataRateKbps} kbps
           </span>
-          <span className="text-slate-400">{throughputKbps} / {totalScienceDataRateKbps} kbps</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
             <div className="flex justify-between text-slate-400 text-[10px] mb-1">
               <span>{t.downlinkSpeed}:</span>
-              <strong className="text-sky-300 tabular-nums font-semibold">{throughputKbps} kbps</strong>
+              <strong className={`${isBottlenecked ? 'text-rose-400' : 'text-sky-300'} tabular-nums font-semibold`}>
+                {throughputKbps} kbps
+              </strong>
             </div>
             <div className="w-full bg-slate-800/80 h-[3px] rounded-full overflow-hidden">
               <div
-                className="h-full bg-sky-400"
+                className={`h-full ${isBottlenecked ? 'bg-rose-500' : 'bg-sky-400'}`}
                 style={{ width: `${Math.min(100, (throughputKbps / 3000) * 100)}%` }}
               />
             </div>
@@ -254,10 +296,13 @@ export const CommsConsole: React.FC = () => {
         </div>
 
         {isBottlenecked && (
-          <div className="border-t border-slate-800 pt-2 flex items-center justify-between text-[10px] font-mono">
-            <span className="text-amber-400 font-medium">{t.bottleneckWarn}</span>
-            <span className="text-rose-400 font-semibold tabular-nums">
-              -{totalScienceDataRateKbps - throughputKbps} kbps
+          <div className="border-t border-rose-500/30 pt-2 flex items-center justify-between text-[11px] font-mono bg-rose-500/10 -mx-4 -mb-4 px-4 py-2.5 text-rose-300">
+            <span className="font-bold flex items-center space-x-1.5">
+              <span>⚠️</span>
+              <span>{t.bottleneckWarn}</span>
+            </span>
+            <span className="text-rose-400 font-bold tabular-nums">
+              -{totalScienceDataRateKbps - throughputKbps} kbps ({isTr ? 'AÇIK - HATA' : 'DEFICIT - ERROR'})
             </span>
           </div>
         )}

@@ -159,11 +159,11 @@ export function calculateMissionTelemetry(state: MissionState, locale: Locale = 
     );
   }
 
-  if (effectiveDownlinkKbps < totalDataRateDemandedKbps * 0.4) {
-    validationWarnings.push(
+  if (effectiveDownlinkKbps < totalDataRateDemandedKbps) {
+    validationErrors.push(
       isTr
-        ? `İletişim darboğazı (${effectiveDownlinkKbps} / ${totalDataRateDemandedKbps} kbps)`
-        : `Comms bottleneck (${effectiveDownlinkKbps} / ${totalDataRateDemandedKbps} kbps)`
+        ? `Kritik İletişim Darboğazı: Üretilen bilim verisi (${totalDataRateDemandedKbps} kbps) > İndirme hızı (${effectiveDownlinkKbps} kbps)`
+        : `Critical Comms Bottleneck: Generated science data (${totalDataRateDemandedKbps} kbps) > Downlink throughput (${effectiveDownlinkKbps} kbps)`
     );
   }
 

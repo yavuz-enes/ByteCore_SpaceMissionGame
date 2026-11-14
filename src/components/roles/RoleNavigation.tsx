@@ -19,6 +19,7 @@ export const RoleNavigation: React.FC = () => {
     myPlayerInfo,
     players,
     locale,
+    telemetry,
     optimizeWithAI,
   } = useMissionStore();
 
@@ -31,6 +32,21 @@ export const RoleNavigation: React.FC = () => {
     { id: 'scientist', label: t.scientist.name },
     { id: 'comms', label: t.comms.name },
   ];
+
+  const getStationHasError = (roleId: MissionStationRole): boolean => {
+    if (roleId === 'comms') {
+      return telemetry.validationErrors.some((e) => e.includes('İletişim') || e.includes('Comms'));
+    }
+    if (roleId === 'engineer') {
+      return telemetry.validationErrors.some(
+        (e) => e.includes('Delta-V') || e.includes('Güç') || e.includes('Power') || e.includes('Kütle') || e.includes('Mass')
+      );
+    }
+    if (roleId === 'commander') {
+      return telemetry.validationErrors.some((e) => e.includes('Bütçe') || e.includes('Budget'));
+    }
+    return false;
+  };
 
   return (
     <div className="relative z-10 w-full max-w-full overflow-hidden bg-[#0B0F17]/95 backdrop-blur-md border-b border-white/10 px-3 sm:px-6 md:px-8 py-2 sm:py-2.5">
@@ -54,6 +70,7 @@ export const RoleNavigation: React.FC = () => {
                 const isUncrewed = !assignedPlayer;
                 const isActive = activeRole === role.id;
                 const canSwitch = isMyStation || isUncrewed;
+                const hasErr = getStationHasError(role.id);
 
                 return (
                   <button
@@ -78,6 +95,9 @@ export const RoleNavigation: React.FC = () => {
                       className="w-4 h-4 rounded-full object-cover border border-white/20 shrink-0"
                     />
                     <span>{role.label}</span>
+                    {hasErr && (
+                      <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)] animate-pulse" title={isTr ? 'Bu istasyonda kritik hata var!' : 'Critical station error!'} />
+                    )}
                     {isPrimary && (
                       <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-800 text-sky-300 font-mono">
                         {isTr ? '1. Görev' : 'Primary'}
@@ -120,6 +140,7 @@ export const RoleNavigation: React.FC = () => {
             <div className="flex items-center space-x-2 w-full sm:w-auto overflow-x-auto no-scrollbar py-0.5 min-w-0">
               {roleList.map((role) => {
                 const isActive = activeRole === role.id;
+                const hasErr = getStationHasError(role.id);
 
                 return (
                   <button
@@ -132,6 +153,9 @@ export const RoleNavigation: React.FC = () => {
                     }`}
                   >
                     <span>{role.label}</span>
+                    {hasErr && (
+                      <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)] animate-pulse" title={isTr ? 'Bu istasyonda kritik hata var!' : 'Critical station error!'} />
+                    )}
                   </button>
                 );
               })}

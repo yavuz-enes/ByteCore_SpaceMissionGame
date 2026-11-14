@@ -107,6 +107,13 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
   const [preLaunchConfirmed, setPreLaunchConfirmed] = useState(false);
 
   // -------------------------------------------------------------------------
+  // IN-FLIGHT SYSTEM COLLAPSE / CRASH MONITOR STATE
+  // -------------------------------------------------------------------------
+  const [isCrashing, setIsCrashing] = useState(false);
+  const [crashReason, setCrashReason] = useState<string>('');
+  const hasTriggeredCrashRef = useRef(false);
+
+  // -------------------------------------------------------------------------
   // TELEMETRY LIVE TICKER ACCUMULATORS
   // -------------------------------------------------------------------------
   const [liveAltM, setLiveAltM] = useState(0);
@@ -219,6 +226,9 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
   useEffect(() => {
     if (flightStage === 'design') {
       setPreLaunchConfirmed(false);
+      setIsCrashing(false);
+      setCrashReason('');
+      hasTriggeredCrashRef.current = false;
       setLiveAltM(0);
       setLiveVelMps(0);
       setLiveQPressureKPa(0);
@@ -252,6 +262,9 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
 
     const interval = setInterval(() => {
       setLiveAltM((prev) => {
+        if (isCrashing) {
+          return Math.max(0, prev - 450);
+        }
         let delta = 40;
         if (flightStage === 'liftoff') delta = 180;
         else if (flightStage === 'max-q') delta = 850;
@@ -265,6 +278,9 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
       });
 
       setLiveVelMps((prev) => {
+        if (isCrashing) {
+          return Math.max(0, prev - 140);
+        }
         let delta = 15;
         if (flightStage === 'liftoff') delta = 45;
         else if (flightStage === 'max-q') delta = 120;
@@ -278,6 +294,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
 
       // Dynamic pressure curve (Peaks around 35-40 kPa at ~12-14 km altitude)
       setLiveQPressureKPa((_) => {
+        if (isCrashing) return 58.4 + Math.random() * 4.0;
         if (flightStage === 'liftoff') return Math.min(28, 12 + Math.random() * 4);
         if (flightStage === 'max-q') return 35.8 + Math.random() * 2.2;
         if (flightStage === 'stage-sep') return Math.max(2, 14 - Math.random() * 3);
@@ -286,6 +303,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
 
       // G-force
       setLiveGForce((_) => {
+        if (isCrashing) return 4.5 + Math.random() * 2.0;
         if (flightStage === 'liftoff') return 1.4 + Math.random() * 0.2;
         if (flightStage === 'max-q') return 2.8 + Math.random() * 0.4;
         if (flightStage === 'stage-sep') return 1.2 + Math.random() * 0.2;
@@ -294,11 +312,72 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
       });
 
       // Fuel burn
-      setLiveFuelPercent((prev) => Math.max(12, prev - 0.25));
+      setLiveFuelPercent((prev) => {
+        if (isCrashing) return Math.max(0, prev - 1.2);
+        return Math.max(12, prev - 0.25);
+      });
     }, 200);
 
     return () => clearInterval(interval);
-  }, [flightStage, updateSimTelemetry]);
+  }, [flightStage, isCrashing, updateSimTelemetry]);
+
+  // -------------------------------------------------------------------------
+  // IN-FLIGHT DEFICIENCY CRASH TRIGGER (Catastrophic collapse if flaws exist)
+  // -------------------------------------------------------------------------
+  useEffect(() => {
+    if (
+      flightStage === 'design' ||
+      flightStage === 'countdown' ||
+      flightStage === 'mission-complete' ||
+      flightStage === 'mission-failed'
+    ) {
+      return;
+    }
+
+    if (telemetry.validationErrors.length > 0 && !hasTriggeredCrashRef.current) {
+      hasTriggeredCrashRef.current = true;
+
+      // After 3.5 seconds of climbing, the flaw triggers emergency alarm & dive
+      const timer = setTimeout(() => {
+        setIsCrashing(true);
+
+        const firstError = telemetry.validationErrors[0] || '';
+        let detailedReason = firstError;
+
+        if (firstError.includes('İletişim') || firstError.includes('Comms')) {
+          detailedReason = isTr
+            ? 'İletişim Darboğazı: Bilim yükünün ürettiği veri akışı yer istasyonu indirme kapasitesini aştı; telemetri ve rota kontrol sinyali koptu, roket rotadan çıkarak yere çakıldı.'
+            : 'Comms Bottleneck: Scientific payload data stream exceeded ground downlink throughput; telemetry and guidance lock severed, vehicle deflected into catastrophic crash.';
+        } else if (firstError.includes('Delta-V')) {
+          detailedReason = isTr
+            ? 'Yetersiz İtki (Delta-V): Roketin yakıt ve itki rezervi yörünge hızına ulaşmaya yetmedi; yerçekimine yenik düşerek balistik düşüşle atmosfere çakıldı.'
+            : 'Insufficient Delta-V: Vehicle propellant reserve unable to achieve orbital insertion velocity; sub-orbital re-entry and impact.';
+        } else if (firstError.includes('Güç') || firstError.includes('Power')) {
+          detailedReason = isTr
+            ? 'Güç Açığı & Avionik Kararması: Güneş panelleri ve bataryalar uçuş bilgisayarlarını besleyemedi; tüm avionikler karardı ve motor yönlendirmesi kilitlendi.'
+            : 'Power Deficit: Solar arrays and batteries unable to power flight computers; avionics blackout resulted in total loss of control.';
+        } else if (firstError.includes('Kütle') || firstError.includes('Mass')) {
+          detailedReason = isTr
+            ? 'Aşırı Yük / Kütle Aşımı: Roketin fırlatma ağırlığı yapısal sınırları aştığı için azami dinamik basınç altında gövde aerodinamik parçalanmaya uğradı.'
+            : 'Mass Limit Exceeded: Spacecraft mass exceeded launch vehicle structural rating; aerodynamic breakup under dynamic load.';
+        } else if (firstError.includes('Bütçe') || firstError.includes('Budget')) {
+          detailedReason = isTr
+            ? 'Bütçe Yetersizliği: Yetersiz kaynak nedeniyle alt sistem entegrasyonu tamamlanamadı ve kritik fırlatma aşamasında sensörler kilitlendi.'
+            : 'Budget Deficit: Subsystems lacked complete qualification; guidance sensors locked during critical ascent.';
+        }
+
+        setCrashReason(detailedReason);
+
+        // Crash dive sequence lasts 2.8 seconds, then transitions cleanly to mission-failed screen
+        setTimeout(() => {
+          setIsCrashing(false);
+          setFlightStage('mission-failed');
+        }, 2800);
+      }, 3500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [flightStage, telemetry.validationErrors, isTr, setFlightStage]);
 
   // -------------------------------------------------------------------------
   // MINI-GAME 1 LOGIC: PITCH GIMBAL ATTITUDE CORRIDOR
@@ -339,7 +418,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
 
   // Trigger countdown when pitch is fully aligned
   useEffect(() => {
-    if (flightStage === 'liftoff' && pitchHoldProgress >= 100 && pitchCountdown === null) {
+    if (flightStage === 'liftoff' && pitchHoldProgress >= 100 && pitchCountdown === null && !isCrashing) {
       setPitchCountdown(3);
       let count = 3;
       const countTimer = setInterval(() => {
@@ -509,7 +588,10 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
   const handleResetFlight = () => {
     resetToDesign();
     setPreLaunchConfirmed(false);
+    setIsCrashing(false);
+    setCrashReason('');
     hasTriggeredAnomalyRef.current = false;
+    hasTriggeredCrashRef.current = false;
   };
 
   const handleAdjustPitch = (deltaDeg: number) => {
@@ -604,6 +686,21 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
         style={{ backgroundImage: `url('./flight-kit/bg-cockpit-overlay.png')` }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#070B14]/80 via-transparent to-[#070B14]/95 pointer-events-none -z-10" />
+
+      {/* Dynamic Red Emergency Crash Alarm Effects (Pure lightweight CSS, zero lag) */}
+      {isCrashing && (
+        <>
+          <div className="fixed inset-0 pointer-events-none z-50 border-[8px] border-rose-600 shadow-[inset_0_0_160px_rgba(225,29,72,0.85)] animate-pulse" />
+          <div className="fixed top-14 left-1/2 -translate-x-1/2 z-50 bg-rose-600 text-white font-mono font-bold px-5 sm:px-8 py-2.5 rounded-full border-2 border-white shadow-[0_0_35px_rgba(225,29,72,0.95)] flex items-center space-x-3 animate-bounce">
+            <span className="w-3 h-3 rounded-full bg-white animate-ping" />
+            <span className="text-xs sm:text-sm tracking-wider uppercase">
+              {isTr
+                ? '🚨 KRİTİK SİSTEM ARIZASI: TELEMETRİ KOPTU // ARAÇ DÜŞÜYOR!'
+                : '🚨 CRITICAL SYSTEM FAILURE: TELEMETRY LOST // VEHICLE CRASHING!'}
+            </span>
+          </div>
+        </>
+      )}
 
       {/* --------------------------------------------------------------------- */}
       {/* 1. TOP GLOBAL FLIGHT BRIDGE HEADER                                   */}
@@ -727,58 +824,112 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
 
             {/* Subsystems Readiness Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs font-mono">
-              <div className="p-3.5 rounded-xl border border-slate-800 bg-[#0B0F17] space-y-2">
+              <div
+                className={`p-3.5 rounded-xl border space-y-2 ${
+                  !telemetry.deltaVSufficient
+                    ? 'border-rose-500/60 bg-rose-950/25'
+                    : 'border-slate-800 bg-[#0B0F17]'
+                }`}
+              >
                 <div className="flex items-center justify-between text-slate-400">
                   <span className="text-[10px] uppercase font-bold">{isTr ? 'İTKİ & DELTA-V' : 'PROPULSION & ΔV'}</span>
-                  <Flame className="w-3.5 h-3.5 text-amber-400" />
+                  <Flame className={`w-3.5 h-3.5 ${!telemetry.deltaVSufficient ? 'text-rose-400' : 'text-amber-400'}`} />
                 </div>
-                <div className="text-lg font-bold text-white tabular-nums">
+                <div className={`text-lg font-bold tabular-nums ${!telemetry.deltaVSufficient ? 'text-rose-400' : 'text-white'}`}>
                   {telemetry.availableDeltaVMps.toLocaleString()} m/s
                 </div>
-                <span className="text-[10px] text-emerald-400 block font-medium">
-                  {isTr ? 'Gerekli' : 'Req'}: {currentScenario.requiredDeltaV.toLocaleString()} m/s (+{telemetry.deltaVMarginPercent}%)
+                <span className={`text-[10px] block font-medium ${!telemetry.deltaVSufficient ? 'text-rose-400 font-bold' : 'text-emerald-400'}`}>
+                  {isTr ? 'Gerekli' : 'Req'}: {currentScenario.requiredDeltaV.toLocaleString()} m/s ({telemetry.deltaVMarginPercent > 0 ? `+${telemetry.deltaVMarginPercent}%` : `${telemetry.deltaVMarginPercent}%`})
                 </span>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-slate-800 bg-[#0B0F17] space-y-2">
+              <div
+                className={`p-3.5 rounded-xl border space-y-2 ${
+                  !telemetry.powerPositive
+                    ? 'border-rose-500/60 bg-rose-950/25'
+                    : 'border-slate-800 bg-[#0B0F17]'
+                }`}
+              >
                 <div className="flex items-center justify-between text-slate-400">
                   <span className="text-[10px] uppercase font-bold">{isTr ? 'GÜÇ & TERMAL' : 'POWER & THERMAL'}</span>
-                  <Zap className="w-3.5 h-3.5 text-sky-400" />
+                  <Zap className={`w-3.5 h-3.5 ${!telemetry.powerPositive ? 'text-rose-400' : 'text-sky-400'}`} />
                 </div>
-                <div className="text-lg font-bold text-white tabular-nums">
+                <div className={`text-lg font-bold tabular-nums ${!telemetry.powerPositive ? 'text-rose-400' : 'text-white'}`}>
                   {telemetry.netPowerW > 0 ? `+${telemetry.netPowerW} W` : `${telemetry.netPowerW} W`}
                 </div>
-                <span className="text-[10px] text-emerald-400 block font-medium">
-                  TVAC Skoru: {environmentalTests.tvacScore}% Nominal
+                <span className={`text-[10px] block font-medium ${!telemetry.powerPositive ? 'text-rose-400 font-bold' : 'text-emerald-400'}`}>
+                  TVAC Skoru: {environmentalTests.tvacScore}% {environmentalTests.tvacScore >= 70 ? 'Nominal' : 'Kritik'}
                 </span>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-slate-800 bg-[#0B0F17] space-y-2">
+              <div
+                className={`p-3.5 rounded-xl border space-y-2 ${
+                  !telemetry.launchCompatibility
+                    ? 'border-rose-500/60 bg-rose-950/25'
+                    : 'border-slate-800 bg-[#0B0F17]'
+                }`}
+              >
                 <div className="flex items-center justify-between text-slate-400">
                   <span className="text-[10px] uppercase font-bold">{isTr ? 'YAPISAL TİTREŞİM' : 'VIBRATION LIMIT'}</span>
-                  <Activity className="w-3.5 h-3.5 text-purple-400" />
+                  <Activity className={`w-3.5 h-3.5 ${!telemetry.launchCompatibility ? 'text-rose-400' : 'text-purple-400'}`} />
                 </div>
-                <div className="text-lg font-bold text-white tabular-nums">
+                <div className={`text-lg font-bold tabular-nums ${!telemetry.launchCompatibility ? 'text-rose-400' : 'text-white'}`}>
                   {telemetry.totalMassKg.toLocaleString()} kg
                 </div>
-                <span className="text-[10px] text-emerald-400 block font-medium">
+                <span className={`text-[10px] block font-medium ${!telemetry.launchCompatibility ? 'text-rose-400 font-bold' : 'text-emerald-400'}`}>
                   Rezonans Skoru: {environmentalTests.vibrationScore}% Geçti
                 </span>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-slate-800 bg-[#0B0F17] space-y-2">
+              <div
+                className={`p-3.5 rounded-xl border space-y-2 ${
+                  telemetry.validationErrors.some((e) => e.includes('İletişim') || e.includes('Comms'))
+                    ? 'border-rose-500/60 bg-rose-950/25'
+                    : 'border-slate-800 bg-[#0B0F17]'
+                }`}
+              >
                 <div className="flex items-center justify-between text-slate-400">
                   <span className="text-[10px] uppercase font-bold">{isTr ? 'DSN & BİLİM' : 'DSN & SCIENCE'}</span>
-                  <Radio className="w-3.5 h-3.5 text-emerald-400" />
+                  <Radio className={`w-3.5 h-3.5 ${telemetry.validationErrors.some((e) => e.includes('İletişim') || e.includes('Comms')) ? 'text-rose-400' : 'text-emerald-400'}`} />
                 </div>
                 <div className="text-lg font-bold text-sky-300 tabular-nums">
                   {telemetry.sciencePoints} {isTr ? 'Puan' : 'PTS'}
                 </div>
-                <span className="text-[10px] text-slate-400 block font-medium">
-                  {telemetry.dataThroughputKbps} kbps Link
+                <span className={`text-[10px] block font-medium ${telemetry.validationErrors.some((e) => e.includes('İletişim') || e.includes('Comms')) ? 'text-rose-400 font-bold' : 'text-slate-400'}`}>
+                  {telemetry.dataThroughputKbps} kbps Link {telemetry.validationErrors.some((e) => e.includes('İletişim') || e.includes('Comms')) && '(Darboğaz)'}
                 </span>
               </div>
             </div>
+
+            {/* Critical Deficiencies List / Risk Overview */}
+            {telemetry.validationErrors.length > 0 && (
+              <div className="p-4 rounded-xl border border-rose-500/60 bg-rose-950/40 font-mono text-xs space-y-2 shadow-[0_0_15px_rgba(244,63,94,0.15)]">
+                <div className="flex items-center space-x-2 text-rose-400 font-bold uppercase text-[11px]">
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400 animate-pulse" />
+                  <span>
+                    {isTr
+                      ? `MÜHENDİSLİK RİSK UYARISI (${telemetry.validationErrors.length} KRİTİK EKSİKLİK TESPİT EDİLDİ)`
+                      : `ENGINEERING RISK ALERT (${telemetry.validationErrors.length} CRITICAL DEFICIENCIES DETECTED)`}
+                  </span>
+                </div>
+                <div className="space-y-1 text-[11px] text-rose-200/90 pl-6">
+                  {telemetry.validationErrors.map((err, i) => (
+                    <div key={i} className="flex items-start space-x-1.5">
+                      <span className="text-rose-400 font-bold">•</span>
+                      <span>{err}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="text-[10px] text-amber-300 font-semibold pl-6 pt-1.5 border-t border-rose-500/20 flex items-center space-x-1.5">
+                  <span>⚠️</span>
+                  <span>
+                    {isTr
+                      ? 'Fırlatmayı yine de onaylayabilirsiniz. Ancak fırlatmadan kısa süre sonra sistem çöküşü yaşanacak ve araç düşecektir!'
+                      : 'You may still authorize launch. However, critical system collapse will trigger shortly after liftoff causing loss of vehicle!'}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Launch Vehicle & Payload Overview */}
             <div className="border border-slate-800 rounded-xl p-4 bg-[#080C14] flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -787,7 +938,11 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
                   {currentVehicle.name} ({currentVehicle.manufacturer})
                 </span>
                 <p className="text-[11px] text-slate-400">
-                  {isTr
+                  {telemetry.validationErrors.length > 0
+                    ? isTr
+                      ? 'Araçta kritik eksiklikler olmasına rağmen fırlatma komutası açık tutulmaktadır. Onay verildiğinde telemetri simülasyonu başlatılır.'
+                      : 'Launch controls remain operational despite deficiencies. Authorizing initiates active flight telemetry.'
+                    : isTr
                     ? 'Tüm alt sistem kontrolleri tamamlandı. Fırlatma onaylandığında görev kontrolü aşamalı kokpit mini oyunlarına devredilecektir.'
                     : 'All subsystems validated. Confirming launch hands control over to interactive multi-stage flight operations.'}
                 </p>
@@ -795,10 +950,22 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
 
               <button
                 onClick={handleConfirmPreLaunch}
-                className="px-8 py-3.5 rounded-full bg-white text-slate-950 hover:bg-slate-100 font-display font-bold text-xs sm:text-sm tracking-wider shadow-lg hover:shadow-xl transition-all cursor-pointer whitespace-nowrap flex items-center space-x-2 group"
+                className={`px-8 py-3.5 rounded-full font-display font-bold text-xs sm:text-sm tracking-wider shadow-lg transition-all cursor-pointer whitespace-nowrap flex items-center space-x-2 group ${
+                  telemetry.validationErrors.length > 0
+                    ? 'bg-rose-500 text-white hover:bg-rose-600 shadow-[0_0_20px_rgba(244,63,94,0.4)]'
+                    : 'bg-white text-slate-950 hover:bg-slate-100 shadow-xl'
+                }`}
               >
                 <Play className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
-                <span>{isTr ? 'FIRLATMA İÇİN ONAY VER (GO FOR LAUNCH)' : 'GO FOR LAUNCH (START EXPEDITION)'}</span>
+                <span>
+                  {telemetry.validationErrors.length > 0
+                    ? isTr
+                      ? 'RİSKLİ FIRLATMA İÇİN ONAY VER (GO FOR LAUNCH)'
+                      : 'AUTHORIZE LAUNCH DESPITE RISKS (GO FOR LAUNCH)'
+                    : isTr
+                    ? 'FIRLATMA İÇİN ONAY VER (GO FOR LAUNCH)'
+                    : 'GO FOR LAUNCH (START EXPEDITION)'}
+                </span>
               </button>
             </div>
           </div>
@@ -860,7 +1027,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
               <div
                 className="transition-transform duration-100 ease-out flex flex-col items-center pointer-events-none"
                 style={{
-                  transform: `rotate(${pitchAngleDeg}deg)`,
+                  transform: isCrashing ? 'rotate(68deg) scale(0.92)' : `rotate(${pitchAngleDeg}deg)`,
                 }}
               >
                 {/* Rocket Nose Cone & Body */}
@@ -1381,6 +1548,101 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
         )}
 
         {/* ================================================================= */}
+        {/* MISSION FAILED / LOSS OF VEHICLE DEBRIEF SCREEN                   */}
+        {/* ================================================================= */}
+        {flightStage === 'mission-failed' && (
+          <div className="max-w-2xl w-full border border-rose-500/50 rounded-2xl bg-[#0E1422]/95 backdrop-blur-md p-6 md:p-8 space-y-6 shadow-2xl text-center relative overflow-hidden">
+            {/* Ambient Red Alert Glow */}
+            <div className="absolute inset-0 bg-rose-500/5 pointer-events-none -z-10" />
+
+            {/* Failure Badge / Icon */}
+            <div className="w-20 h-20 mx-auto rounded-full bg-rose-500/20 border-2 border-rose-500 flex items-center justify-center text-rose-400 shadow-[0_0_30px_rgba(244,63,94,0.35)]">
+              <AlertTriangle className="w-10 h-10 animate-pulse" />
+            </div>
+
+            <div>
+              <span className="text-xs font-mono text-rose-400 font-bold uppercase tracking-widest flex items-center justify-center space-x-2">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                <span>{isTr ? 'GÖREV BAŞARISIZ // ARAÇ DÜŞTÜ' : 'MISSION FAILED // LOSS OF VEHICLE'}</span>
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-display font-bold text-white mt-1">
+                {currentScenario.name}
+              </h2>
+            </div>
+
+            {/* Aerospace Mishap Investigation Report */}
+            <div className="p-4 rounded-xl border border-rose-500/40 bg-rose-950/30 text-left font-mono space-y-2">
+              <div className="flex items-center justify-between text-[11px] text-rose-300 font-bold uppercase border-b border-rose-500/30 pb-1.5">
+                <span>{isTr ? 'UÇUŞ KAZASI ARAŞTIRMA RAPORU' : 'FLIGHT MISHAP INVESTIGATION REPORT'}</span>
+                <span className="text-rose-400 font-bold">FATAL ABORT</span>
+              </div>
+              <p className="text-xs text-rose-200/95 leading-relaxed font-sans sm:font-mono">
+                {crashReason || (isTr ? 'Alt sistemlerdeki kritik eksiklikler nedeniyle araç irtifa kaybederek düştü.' : 'Critical subsystem deficiencies led to loss of altitude and vehicle impact.')}
+              </p>
+            </div>
+
+            {/* Diagnostics at Loss Point */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
+              <div className="p-3 border border-slate-800 rounded-xl bg-[#0B0F17]">
+                <span className="text-slate-400 block text-[10px]">{isTr ? 'SON İRTİFA' : 'FINAL ALTITUDE'}</span>
+                <strong className="text-rose-400 text-base font-bold mt-1 block">
+                  0 m ({isTr ? 'Çarpışma' : 'Impact'})
+                </strong>
+              </div>
+
+              <div className="p-3 border border-slate-800 rounded-xl bg-[#0B0F17]">
+                <span className="text-slate-400 block text-[10px]">{isTr ? 'GÖVDE DURUMU' : 'HULL STATUS'}</span>
+                <strong className="text-rose-400 text-base font-bold mt-1 block">
+                  {isTr ? 'Parçalandı' : 'Destroyed'}
+                </strong>
+              </div>
+
+              <div className="p-3 border border-slate-800 rounded-xl bg-[#0B0F17]">
+                <span className="text-slate-400 block text-[10px]">{isTr ? 'TELEMETRİ' : 'TELEMETRY'}</span>
+                <strong className="text-rose-400 text-base font-bold mt-1 block">
+                  {isTr ? 'Sinyal Yok' : 'Lost'}
+                </strong>
+              </div>
+
+              <div className="p-3 border border-slate-800 rounded-xl bg-[#0B0F17]">
+                <span className="text-slate-400 block text-[10px]">{isTr ? 'HATALI SİSTEM' : 'DEFECTS'}</span>
+                <strong className="text-amber-400 text-base font-bold mt-1 block">
+                  {telemetry.validationErrors.length} {isTr ? 'Kritik Hata' : 'Errors'}
+                </strong>
+              </div>
+            </div>
+
+            {/* Corrective Guidance */}
+            <div className="p-3 rounded-xl border border-slate-800 bg-[#0B0F17] text-left text-xs font-mono text-slate-300">
+              <span className="text-sky-400 font-bold block mb-1">
+                {isTr ? '💡 DÜZELTME TAVSİYESİ:' : '💡 CORRECTIVE RECOMMENDATION:'}
+              </span>
+              <span>
+                {isTr
+                  ? 'Haberleşme istasyonuna giderek daha yüksek kazançlı anten veya DSN yer istasyonu seçerek darboğazı giderin. İtki ve güç sistemlerini yeşil nominal sınırlara getirin.'
+                  : 'Resolve comms bottlenecks by choosing a higher-gain antenna or DSN ground station. Ensure delta-V and power reserves meet required thresholds.'}
+              </span>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={handleResetFlight}
+                className="w-full sm:w-auto px-8 py-3 rounded-full bg-white text-slate-950 hover:bg-slate-100 font-mono font-bold text-xs transition-all cursor-pointer shadow-md"
+              >
+                {isTr ? 'Yeniden Tasarla & Hataları Düzelt' : 'Redesign & Fix Deficiencies'}
+              </button>
+              <button
+                onClick={onClose}
+                className="w-full sm:w-auto px-6 py-3 rounded-full border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 font-mono text-xs transition-all cursor-pointer"
+              >
+                {isTr ? 'Uçuş Köprüsünden Çık' : 'Exit Flight Deck'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ================================================================= */}
         {/* 10 CRITICAL IN-FLIGHT ANOMALIES MODAL OVERLAY (WITH 4 CHOICES)    */}
         {/* ================================================================= */}
         {activeAnomaly && (
@@ -1474,63 +1736,63 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
         <footer className="w-full bg-[#0B0F17]/95 border-t border-white/10 px-4 md:px-8 py-3 shrink-0 backdrop-blur-md z-40">
           <div className="max-w-[1400px] mx-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 font-mono text-xs tabular-nums">
             {/* 1. Altitude */}
-            <div className="p-2.5 rounded-xl border border-slate-800 bg-[#0E1422] space-y-1">
+            <div className={`p-2.5 rounded-xl border space-y-1 ${isCrashing ? 'border-rose-500/80 bg-rose-950/40' : 'border-slate-800 bg-[#0E1422]'}`}>
               <span className="text-slate-500 text-[10px] block uppercase font-bold">
                 {isTr ? 'İRTİFA (ALTITUDE)' : 'ALTITUDE'}
               </span>
-              <strong className="text-emerald-400 text-base font-bold block">
+              <strong className={`text-base font-bold block ${isCrashing ? 'text-rose-400 animate-pulse' : 'text-emerald-400'}`}>
                 {liveAltM < 1000 ? `${liveAltM.toLocaleString()} m` : `${(liveAltM / 1000).toFixed(1)} km`}
               </strong>
             </div>
 
             {/* 2. Velocity */}
-            <div className="p-2.5 rounded-xl border border-slate-800 bg-[#0E1422] space-y-1">
+            <div className={`p-2.5 rounded-xl border space-y-1 ${isCrashing ? 'border-rose-500/80 bg-rose-950/40' : 'border-slate-800 bg-[#0E1422]'}`}>
               <span className="text-slate-500 text-[10px] block uppercase font-bold">
                 {isTr ? 'HIZ (VELOCITY)' : 'VELOCITY'}
               </span>
-              <strong className="text-white text-base font-bold block">
+              <strong className={`text-base font-bold block ${isCrashing ? 'text-rose-400' : 'text-white'}`}>
                 {liveVelMps.toLocaleString()} m/s
               </strong>
               <span className="text-[9px] text-slate-500 block">MACH {(liveVelMps / 343).toFixed(1)}</span>
             </div>
 
             {/* 3. Dynamic Pressure */}
-            <div className="p-2.5 rounded-xl border border-slate-800 bg-[#0E1422] space-y-1">
+            <div className={`p-2.5 rounded-xl border space-y-1 ${isCrashing ? 'border-rose-500/80 bg-rose-950/40' : 'border-slate-800 bg-[#0E1422]'}`}>
               <span className="text-slate-500 text-[10px] block uppercase font-bold">
                 {isTr ? 'DİNAMİK BASINÇ (Q)' : 'DYN. PRESSURE'}
               </span>
-              <strong className={`text-base font-bold block ${liveQPressureKPa > 30 ? 'text-amber-400' : 'text-slate-300'}`}>
+              <strong className={`text-base font-bold block ${isCrashing ? 'text-rose-500' : liveQPressureKPa > 30 ? 'text-amber-400' : 'text-slate-300'}`}>
                 {liveQPressureKPa.toFixed(1)} kPa
               </strong>
             </div>
 
             {/* 4. G-Force */}
-            <div className="p-2.5 rounded-xl border border-slate-800 bg-[#0E1422] space-y-1">
+            <div className={`p-2.5 rounded-xl border space-y-1 ${isCrashing ? 'border-rose-500/80 bg-rose-950/40' : 'border-slate-800 bg-[#0E1422]'}`}>
               <span className="text-slate-500 text-[10px] block uppercase font-bold">
                 {isTr ? 'G-KUVVETİ (G-LOAD)' : 'G-FORCE LOAD'}
               </span>
-              <strong className="text-white text-base font-bold block">
+              <strong className={`text-base font-bold block ${isCrashing ? 'text-rose-400' : 'text-white'}`}>
                 {liveGForce.toFixed(2)} g
               </strong>
             </div>
 
             {/* 5. Fuel Remaining */}
-            <div className="p-2.5 rounded-xl border border-slate-800 bg-[#0E1422] space-y-1">
+            <div className={`p-2.5 rounded-xl border space-y-1 ${isCrashing ? 'border-rose-500/80 bg-rose-950/40' : 'border-slate-800 bg-[#0E1422]'}`}>
               <span className="text-slate-500 text-[10px] block uppercase font-bold">
                 {isTr ? 'YAKIT REZERVİ' : 'PROPELLANT'}
               </span>
-              <strong className="text-sky-300 text-base font-bold block">
+              <strong className={`text-base font-bold block ${isCrashing ? 'text-rose-400' : 'text-sky-300'}`}>
                 {liveFuelPercent.toFixed(1)}%
               </strong>
             </div>
 
             {/* 6. DSN Signal & Target Distance */}
-            <div className="p-2.5 rounded-xl border border-slate-800 bg-[#0E1422] space-y-1">
+            <div className={`p-2.5 rounded-xl border space-y-1 ${isCrashing ? 'border-rose-500/80 bg-rose-950/40' : 'border-slate-800 bg-[#0E1422]'}`}>
               <span className="text-slate-500 text-[10px] block uppercase font-bold">
                 {isTr ? 'DSN KİLİDİ' : 'DSN LOCK'}
               </span>
-              <strong className="text-emerald-400 text-base font-bold block">
-                {simDownlinkPercent > 0 ? `${simDownlinkPercent}% NOMINAL` : 'STANDBY'}
+              <strong className={`text-base font-bold block ${isCrashing ? 'text-rose-400' : 'text-emerald-400'}`}>
+                {isCrashing ? (isTr ? 'SİNYAL KOPTU' : 'SIGNAL LOST') : simDownlinkPercent > 0 ? `${simDownlinkPercent}% NOMINAL` : 'STANDBY'}
               </strong>
             </div>
           </div>
