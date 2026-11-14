@@ -1,0 +1,306 @@
+{
+  "en": {
+    "site": {
+      "title": "BYTECORE MISSION DESIGN GAME",
+      "tagline": "Cooperative Deep Space Flight Simulator",
+      "badge": "AEROSPACE SIMULATION",
+      "heroTitle": "DESIGN. SIMULATE. EXPLORE.",
+      "heroSubtitle": "Collaborative interplanetary mission control powered by authentic orbital mechanics.",
+      "startMissionBtn": "START MISSION",
+      "waitingCrewBtn": "WAITING FOR CREW (MIN. 2 PLAYERS)",
+      "createRoomBtn": "HOST EXPEDITION",
+      "joinRoomBtn": "JOIN FREQUENCY",
+      "activeLobbyBadge": "LOBBY",
+      "soloExploreBtn": "SOLO FLIGHT DECK"
+    },
+    "team": {
+      "title": "BYTECORE TEAM",
+      "subtitle": "DEEP SPACE SYSTEMS ENGINEERING",
+      "name": "BYTECORE TEAM",
+      "callsign": "BYTECORE-TEAM",
+      "missionStatement": "Authentic space mission engineering built on collaborative orbital dynamics.",
+      "members": [
+        {
+          "name": "Enes Yavuz Özgen",
+          "role": "Software Engineer",
+          "callsign": "DEV",
+          "bio": "Software & Flight Control Systems"
+        },
+        {
+          "name": "Veli Kağan Şahin",
+          "role": "Designer",
+          "callsign": "DESIGN",
+          "bio": "Aerospace UI/UX & Visual Design"
+        },
+        {
+          "name": "Enes Kalmaz",
+          "role": "Systems Engineer",
+          "callsign": "ENG",
+          "bio": "Subsystems & Orbital Dynamics"
+        },
+        {
+          "name": "Taner Birtek",
+          "role": "Mission Engineer",
+          "callsign": "OPS",
+          "bio": "Mission Control & Simulation"
+        }
+      ]
+    },
+    "learningOutcomes": [
+      {
+        "id": "orbital-mechanics",
+        "title": "Orbital Mechanics & Delta-V",
+        "tagline": "Tsiolkovsky Dynamics",
+        "description": "Calculate propellant mass fractions and velocity changes for Hohmann transfer trajectories.",
+        "metric": "Δv = Isp · g₀ · ln(m₀ / mf)",
+        "metricLabel": "Tsiolkovsky Dynamics"
+      },
+      {
+        "id": "power-thermal",
+        "title": "Deep Space Solar Flux",
+        "tagline": "Inverse Square Irradiance",
+        "description": "Solar irradiance decays with the inverse-square law, dropping to 3.7% at Jupiter.",
+        "metric": "P(d) = P₀ · (1 AU / d)²",
+        "metricLabel": "Inverse Square Law"
+      },
+      {
+        "id": "telecommunications",
+        "title": "Deep Space Telecom & Delay",
+        "tagline": "Free Space Path Loss",
+        "description": "Model light-speed latency and signal attenuation across Deep Space Network ground stations.",
+        "metric": "FSPL = (4πd / λ)²",
+        "metricLabel": "Friis Transmission Model"
+      },
+      {
+        "id": "systems-engineering",
+        "title": "Systems Engineering Trades",
+        "tagline": "Cost & Payload Optimization",
+        "description": "Balance launch vehicle payload mass against scientific instruments within strict budget limits.",
+        "metric": "Cost ≤ Initial Budget ($M)",
+        "metricLabel": "Budget Ceiling"
+      }
+    ],
+    "destinations": [
+      {
+        "id": "lunar-recon",
+        "target": "Moon",
+        "name": "Lunar Reconnaissance Orbiter",
+        "distance": "0.0026 AU (~384,400 km)",
+        "budget": 280,
+        "deltaV": 3950,
+        "radiation": "Low (0.1 Sv/yr)",
+        "solarFlux": "100% (1361 W/m²)",
+        "tagline": "Map permanently shadowed craters and discover volatile water ice at the lunar South Pole.",
+        "description": "Targeting Shackleton and Faustini craters to map subsurface hydrogen volatiles. Essential for determining propellant ISRU viability for NASA Artemis astronaut encampments.",
+        "objectives": [
+          "Polar low-altitude laser altimetry profiling",
+          "Neutron spectrometer hydrogen epithermal mapping",
+          "Direct Earth S-band telemetry link with zero latency"
+        ]
+      },
+      {
+        "id": "mars-sample",
+        "target": "Mars",
+        "name": "Mars Atmospheric & Sample Explorer",
+        "distance": "1.52 AU (~225M km)",
+        "budget": 650,
+        "deltaV": 5600,
+        "radiation": "Moderate (0.3 Sv/yr)",
+        "solarFlux": "43% (585 W/m²)",
+        "tagline": "Search for atmospheric methane plumes and ancient hydrothermal biosignatures.",
+        "description": "Navigate interplanetary cruise to enter Mars elliptical orbit. Balance severe comm delays (up to 20 mins) with heavy multispectral spectrometers and 57% solar power drop.",
+        "objectives": [
+          "Hyperspectral trace gas atmospheric limb sounding",
+          "Paleolake delta biosignature reconnaissance",
+          "Autonomous aerobraking and orbital trimming"
+        ]
+      },
+      {
+        "id": "europa-explorer",
+        "target": "Europa",
+        "name": "Europa Ocean Life Explorer",
+        "distance": "5.20 AU (~780M km)",
+        "budget": 1150,
+        "deltaV": 8200,
+        "radiation": "Extreme (5.4 Sv/pass)",
+        "solarFlux": "3.7% (50 W/m²)",
+        "tagline": "Sound through kilometers of cryogenic ice into Jupiter's warm tidal subsurface ocean.",
+        "description": "Brave lethal Jovian magnetospheric radiation belts. Deploy deep ice-penetrating radar and magnetometers to measure ocean depth, salinity, and potential extraterrestrial biosignatures.",
+        "objectives": [
+          "Dual-frequency ice-penetrating radar sounding",
+          "Induction magnetic sounding of saline ocean core",
+          "Radiation-hardened avionics vault survival"
+        ]
+      },
+      {
+        "id": "asteroid-scout",
+        "target": "Asteroid",
+        "name": "Asteroid Deflection & Resource Scout",
+        "distance": "1.15 AU (~172M km)",
+        "budget": 380,
+        "deltaV": 4800,
+        "radiation": "Moderate (0.2 Sv/yr)",
+        "solarFlux": "85% (1150 W/m²)",
+        "tagline": "Rendezvous with an Apollo-class asteroid to assay rare metals and test kinetic deflection.",
+        "description": "Perform close-proximity stationkeeping around a low-gravity tumbling asteroid. Fire a kinetic impactor projectile and measure volatile mineral ejecta with optical spectrometers.",
+        "objectives": [
+          "LIDAR micro-gravity shape and gravity field modeling",
+          "Kinetic impact momentum transfer measurement",
+          "Assay platinum-group and rare earth mineral distribution"
+        ]
+      }
+    ]
+  },
+  "tr": {
+    "site": {
+      "title": "BYTECORE UZAY GÖREVİ TASARIM OYUNU",
+      "tagline": "İş Birlikli Derin Uzay Görev Simülatörü",
+      "badge": "UZAY SİMÜLASYONU",
+      "heroTitle": "TASARLA. SİMÜLE ET. KEŞFET.",
+      "heroSubtitle": "Gerçek yörünge fiziğiyle çalışan çok oyunculu gezegenler arası görev kontrol simülatörü.",
+      "startMissionBtn": "GÖREVE BAŞLA",
+      "waitingCrewBtn": "MÜRETTEBAT BEKLENİYOR (EN AZ 2 KİŞİ)",
+      "createRoomBtn": "ODA OLUŞTUR",
+      "joinRoomBtn": "ODAYA KATIL",
+      "activeLobbyBadge": "GÖREV LOBİSİ",
+      "soloExploreBtn": "TEK KİŞİLİK UÇUŞ KÖPRÜSÜ"
+    },
+    "team": {
+      "title": "BYTECORE EKİBİ",
+      "subtitle": "DERİN UZAY SİSTEM MÜHENDİSLİĞİ",
+      "name": "BYTECORE EKİBİ",
+      "callsign": "BYTECORE-EKİBİ",
+      "missionStatement": "Gerçek yörünge mekaniği üzerine kurulu iş birlikli uzay görevi simülasyonu.",
+      "members": [
+        {
+          "name": "Enes Yavuz Özgen",
+          "role": "Yazılımcı",
+          "callsign": "DEV",
+          "bio": "Yazılım & Uçuş Kontrol Sistemleri"
+        },
+        {
+          "name": "Veli Kağan Şahin",
+          "role": "Tasarımcı",
+          "callsign": "TASARIM",
+          "bio": "Arayüz & Deneyim Tasarımı"
+        },
+        {
+          "name": "Enes Kalmaz",
+          "role": "Sistem Mühendisi",
+          "callsign": "SİSTEM",
+          "bio": "Alt Sistemler & Yörünge Dinamiği"
+        },
+        {
+          "name": "Taner Birtek",
+          "role": "Görev Mühendisi",
+          "callsign": "GÖREV",
+          "bio": "Görev Kontrol & Simülasyon"
+        }
+      ]
+    },
+    "learningOutcomes": [
+      {
+        "id": "orbital-mechanics",
+        "title": "Yörünge Mekaniği & Delta-V",
+        "tagline": "Tsiolkovsky Dinamiği",
+        "description": "Hohmann transfer rotaları ve yörünge manevraları için gereken hız değişimini hesaplayın.",
+        "metric": "Δv = Isp · g₀ · ln(m₀ / mf)",
+        "metricLabel": "Tsiolkovsky Dinamiği"
+      },
+      {
+        "id": "power-thermal",
+        "title": "Derin Uzay Güneş Işınımı",
+        "tagline": "Ters Kare Yasası",
+        "description": "Güneş enerjisi mesafenin karesiyle azalarak Jüpiter'de %3.7 seviyesine geriler.",
+        "metric": "P(d) = P₀ · (1 AU / d)²",
+        "metricLabel": "Ters Kare Işınımı"
+      },
+      {
+        "id": "telecommunications",
+        "title": "Derin Uzay Haberleşmesi",
+        "tagline": "Boş Uzay Yol Kaybı",
+        "description": "Işık hızı sinyal gecikmesini ve serbest uzay zayıflamasını DSN yer istasyonlarıyla modelleyin.",
+        "metric": "FSPL = (4πd / λ)²",
+        "metricLabel": "Friis İletim Modeli"
+      },
+      {
+        "id": "systems-engineering",
+        "title": "Sistem Mühendisliği Takası",
+        "tagline": "Maliyet & Yük Optimizasyonu",
+        "description": "Faydalı yük kütlesi ile bilimsel aygıtları katı bütçe sınırları içinde dengeleyin.",
+        "metric": "Toplam Maliyet ≤ Bütçe ($M)",
+        "metricLabel": "Bütçe Tavanı"
+      }
+    ],
+    "destinations": [
+      {
+        "id": "lunar-recon",
+        "target": "Moon",
+        "name": "Ay Keşif Yörünge Aracı (LRO)",
+        "distance": "0.0026 AU (~384,400 km)",
+        "budget": 280,
+        "deltaV": 3950,
+        "radiation": "Düşük (0.1 Sv/yıl)",
+        "solarFlux": "%100 (1361 W/m²)",
+        "tagline": "Ay'ın Güney Kutbu'ndaki kalıcı gölgeli kraterleri haritalayın ve su buzu yataklarını tespit edin.",
+        "description": "Shackleton ve Faustini kraterlerindeki hapsolmuş hidrojen uçucularını tarar. NASA Artemis astronot üsleri için yerinde yakıt üretimi (ISRU) fizibilitesini belirler.",
+        "objectives": [
+          "Kutup alçak irtifa lazer altimetresi ile topoğrafik haritalama",
+          "Nötron spektrometresi ile hidrojen uçucu tespiti",
+          "Sıfır gecikmeli doğrudan Dünya S-band telemetri bağlantısı"
+        ]
+      },
+      {
+        "id": "mars-sample",
+        "target": "Mars",
+        "name": "Mars Atmosfer ve Numune Kaşifi",
+        "distance": "1.52 AU (~225M km)",
+        "budget": 650,
+        "deltaV": 5600,
+        "radiation": "Orta (0.3 Sv/yıl)",
+        "solarFlux": "%43 (585 W/m²)",
+        "tagline": "Atmosferik metan gazı izlerini ve antik hidrotermal biyolojik izleri araştırın.",
+        "description": "Mars eliptik yörüngesine giriş için gezegenler arası transferi yönetin. 20 dakikaya varan iletişim gecikmesini, ağır spektrometreleri ve %57 güneş enerjisi kaybını dengeleyin.",
+        "objectives": [
+          "Çok bantlı iz gazı atmosferik taraması",
+          "Eski göl deltası biyolojik iz keşfi",
+          "Otonom aerofrenleme ve yörünge düzeltme"
+        ]
+      },
+      {
+        "id": "europa-explorer",
+        "target": "Europa",
+        "name": "Europa Okyanus Yaşamı Kaşifi",
+        "distance": "5.20 AU (~780M km)",
+        "budget": 1150,
+        "deltaV": 8200,
+        "radiation": "Aşırı (5.4 Sv/geçiş)",
+        "solarFlux": "%3.7 (50 W/m²)",
+        "tagline": "Kilometrelerce kalınlıktaki kriyojenik buz kabuğunu delerek Jüpiter'in sıcak tuzlu yeraltı okyanusunu inceleyin.",
+        "description": "Ölümcül Jüpiter manyetosfer radyasyon kuşaklarına meydan okuyun. Buz altı radarı ve manyetometrelerle okyanus derinliğini, tuzluluğunu ve dünya dışı yaşam izlerini ölçün.",
+        "objectives": [
+          "Çift frekanslı buz delici radar sondajı",
+          "Tuzlu okyanus çekirdeğinin manyetik indüksiyon ölçümü",
+          "Radyasyona karşı zırhlı aviyonik koruma kasası dayanımı"
+        ]
+      },
+      {
+        "id": "asteroid-scout",
+        "target": "Asteroid",
+        "name": "Asteroit Saptırma ve Maden Gözlemcisi",
+        "distance": "1.15 AU (~172M km)",
+        "budget": 380,
+        "deltaV": 4800,
+        "radiation": "Orta (0.2 Sv/yıl)",
+        "solarFlux": "%85 (1150 W/m²)",
+        "tagline": "Apollo sınıfı bir asteroitle buluşup değerli metalleri analiz edin ve kinetik saptırmayı test edin.",
+        "description": "Düşük yerçekimli asteroit çevresinde yakın mesafe manevraları yapın. Kinetik çarpışma mermisi ateşleyerek mineral püskürmesini optik spektrometreyle analiz edin.",
+        "objectives": [
+          "LIDAR ile mikro yerçekimi ve şekil modelleme",
+          "Kinetik çarpışma momentum transfer ölçümü",
+          "Platin grubu ve nadir toprak elementleri dağılım analizi"
+        ]
+      }
+    ]
+  }
+}
