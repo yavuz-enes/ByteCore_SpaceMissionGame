@@ -207,7 +207,7 @@ class MultiplayerService {
         return;
       }
       this.roomCode = cleanCode;
-      const clientId = this.generatePeerId(this.roomCode, false);
+      const clientId = clientPlayer.peerId && clientPlayer.peerId.startsWith('bytecore-') ? clientPlayer.peerId : this.generatePeerId(this.roomCode, false);
       const hostId = this.generatePeerId(this.roomCode, true);
       this.myPeerId = clientId;
       clientPlayer.peerId = clientId;

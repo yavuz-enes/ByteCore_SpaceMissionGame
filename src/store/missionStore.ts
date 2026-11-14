@@ -197,7 +197,18 @@ export const useMissionStore = create<MissionStore>((set, get) => {
     switch (packet.type) {
       case 'PLAYER_JOIN': {
         const existing = state.players.filter((p) => p.peerId !== packet.player.peerId);
-        const updatedPlayers = [...existing, packet.player];
+        
+        // Ensure automatic collision-free initial role assignment
+        const takenRoles = existing.map((p) => p.role);
+        let assignedRole = packet.player.role;
+        const allRoles: PlayerRole[] = ['engineer', 'scientist', 'comms', 'commander'];
+        if (takenRoles.includes(assignedRole)) {
+          const freeRole = allRoles.find((r) => !takenRoles.includes(r));
+          if (freeRole) assignedRole = freeRole;
+        }
+
+        const newPlayer = { ...packet.player, role: assignedRole };
+        const updatedPlayers = [...existing, newPlayer];
         set({ players: updatedPlayers });
 
         // If host, send full sync to everyone
@@ -214,7 +225,7 @@ export const useMissionStore = create<MissionStore>((set, get) => {
             multiplayerService.broadcastPacket(syncPacket);
           }, 350);
         }
-        state.addLogMessage(`[MULTI] ${packet.player.name} joined as ${packet.player.role.toUpperCase()}`);
+        state.addLogMessage(`[MULTI] ${packet.player.name} joined as ${assignedRole.toUpperCase()}`);
         break;
       }
 
@@ -228,7 +239,7 @@ export const useMissionStore = create<MissionStore>((set, get) => {
       case 'ROOM_STATE_SYNC': {
         const telemetry = calculateMissionTelemetry(packet.missionState, state.locale);
         const mySynced = packet.players.find(
-          (p) => p.peerId === state.myPlayerInfo.peerId || p.name === state.myPlayerInfo.name || (!p.isHost && !state.isHost)
+          (p) => p.peerId === state.myPlayerInfo.peerId
         );
         set({
           players: packet.players,
@@ -255,21 +266,24 @@ export const useMissionStore = create<MissionStore>((set, get) => {
             : p
         );
         set({ players: updatedPlayers });
+
+        if (state.isHost) {
+          multiplayerService.broadcastPacket({
+            type: 'ROOM_STATE_SYNC',
+            players: updatedPlayers,
+            missionState: state.missionState,
+            hostPeerId: state.myPlayerInfo.peerId,
+            destinations: state.destinations,
+          });
+        }
         break;
       }
 
       case 'READY_TOGGLE': {
         const updatedPlayers = state.players.map((p) =>
-          p.peerId === packet.peerId ||
-          p.name === packet.peerId ||
-          (!p.isHost && !packet.peerId.includes('host') && state.players.length === 2)
-            ? { ...p, isReady: packet.isReady }
-            : p
+          p.peerId === packet.peerId ? { ...p, isReady: packet.isReady } : p
         );
-        const isMyToggled =
-          packet.peerId === state.myPlayerInfo.peerId ||
-          packet.peerId === state.myPlayerInfo.name ||
-          (!state.isHost && !packet.peerId.includes('host') && state.players.length === 2);
+        const isMyToggled = packet.peerId === state.myPlayerInfo.peerId;
         const myUpdated = isMyToggled
           ? { ...state.myPlayerInfo, isReady: packet.isReady }
           : state.myPlayerInfo;
@@ -869,8 +883,10 @@ export const useMissionStore = create<MissionStore>((set, get) => {
     createRoom: async (roomCode: string, playerName: string, initialRole: PlayerRole, initialSecondaryRole?: PlayerRole) => {
       set({ isConnecting: true, connectionError: null });
       try {
+        const cleanCode = multiplayerService.normalizeRoomCode(roomCode);
+        const hostPeerId = `bytecore-mission-${cleanCode}-host`;
         const hostPlayer: PlayerInfo = {
-          peerId: 'host-player',
+          peerId: hostPeerId,
           name: playerName.trim() || 'Flight Director',
           role: initialRole,
           secondaryRole: initialSecondaryRole,
@@ -879,14 +895,18 @@ export const useMissionStore = create<MissionStore>((set, get) => {
           color: '#54b9ff',
         };
 
-        const hostPeerId = await multiplayerService.createRoom(roomCode, hostPlayer);
-        hostPlayer.peerId = hostPeerId;
+        set({
+          myPlayerInfo: hostPlayer,
+          roomCode: cleanCode,
+        });
+
+        await multiplayerService.createRoom(cleanCode, hostPlayer);
 
         set({
           mode: 'multiplayer',
           isMultiplayer: true,
           isHost: true,
-          roomCode: roomCode.toUpperCase(),
+          roomCode: cleanCode,
           isConnecting: false,
           myPlayerInfo: hostPlayer,
           players: [hostPlayer],
@@ -896,8 +916,8 @@ export const useMissionStore = create<MissionStore>((set, get) => {
         const isTr = get().locale === 'tr';
         get().addLogMessage(
           isTr
-            ? `[ÇOKLU] ${roomCode.toUpperCase()} odası oluşturuldu. Oda kodunu ekip arkadaşlarınızla paylaşın!`
-            : `[MULTI] Room ${roomCode.toUpperCase()} created. Share room code with teammates!`
+            ? `[ÇOKLU] ${cleanCode} odası oluşturuldu. Oda kodunu ekip arkadaşlarınızla paylaşın!`
+            : `[MULTI] Room ${cleanCode} created. Share room code with teammates!`
         );
       } catch (err: any) {
         set({
@@ -910,8 +930,10 @@ export const useMissionStore = create<MissionStore>((set, get) => {
     joinRoom: async (roomCode: string, playerName: string, initialRole: PlayerRole, initialSecondaryRole?: PlayerRole) => {
       set({ isConnecting: true, connectionError: null });
       try {
+        const cleanCode = multiplayerService.normalizeRoomCode(roomCode);
+        const clientId = `bytecore-mission-${cleanCode}-client-${Math.random().toString(36).substring(2, 7)}`;
         const clientPlayer: PlayerInfo = {
-          peerId: 'client-player',
+          peerId: clientId,
           name: playerName.trim() || 'Controller',
           role: initialRole,
           secondaryRole: initialSecondaryRole,
@@ -920,25 +942,28 @@ export const useMissionStore = create<MissionStore>((set, get) => {
           color: '#4bf3c8',
         };
 
-        await multiplayerService.joinRoom(roomCode, clientPlayer);
-        clientPlayer.peerId = multiplayerService.myPeerId;
+        set({
+          myPlayerInfo: clientPlayer,
+          roomCode: cleanCode,
+        });
+
+        await multiplayerService.joinRoom(cleanCode, clientPlayer);
 
         set({
           mode: 'multiplayer',
           isMultiplayer: true,
           isHost: false,
-          roomCode: roomCode.toUpperCase(),
+          roomCode: cleanCode,
           isConnecting: false,
           myPlayerInfo: clientPlayer,
-          players: [clientPlayer],
           activeRole: initialRole,
         });
 
         const isTr = get().locale === 'tr';
         get().addLogMessage(
           isTr
-            ? `[ÇOKLU] ${roomCode.toUpperCase()} odasına ${initialRole.toUpperCase()} olarak bağlanıldı.`
-            : `[MULTI] Connected to Room ${roomCode.toUpperCase()} as ${initialRole.toUpperCase()}.`
+            ? `[ÇOKLU] ${cleanCode} odasına ${initialRole.toUpperCase()} olarak bağlanıldı.`
+            : `[MULTI] Connected to Room ${cleanCode} as ${initialRole.toUpperCase()}.`
         );
       } catch (err: any) {
         set({
@@ -977,7 +1002,7 @@ export const useMissionStore = create<MissionStore>((set, get) => {
     },
 
     claimRole: (role: PlayerRole) => {
-      const { myPlayerInfo, players } = get();
+      const { myPlayerInfo, players, isHost } = get();
       // If claimed role was previously secondary role, clear secondary role
       const secondaryRole = myPlayerInfo.secondaryRole === role ? undefined : myPlayerInfo.secondaryRole;
       const updatedPlayer: PlayerInfo = { ...myPlayerInfo, role, secondaryRole };
@@ -992,18 +1017,28 @@ export const useMissionStore = create<MissionStore>((set, get) => {
       });
 
       if (get().isMultiplayer) {
-        multiplayerService.sendPacket({
-          type: 'ROLE_CLAIM',
-          peerId: myPlayerInfo.peerId,
-          role,
-          secondaryRole,
-          name: myPlayerInfo.name,
-        });
+        if (isHost) {
+          multiplayerService.broadcastPacket({
+            type: 'ROOM_STATE_SYNC',
+            players: updatedPlayers,
+            missionState: get().missionState,
+            hostPeerId: myPlayerInfo.peerId,
+            destinations: get().destinations,
+          });
+        } else {
+          multiplayerService.sendPacket({
+            type: 'ROLE_CLAIM',
+            peerId: myPlayerInfo.peerId,
+            role,
+            secondaryRole,
+            name: myPlayerInfo.name,
+          });
+        }
       }
     },
 
     claimSecondaryRole: (role: PlayerRole | undefined) => {
-      const { myPlayerInfo, players } = get();
+      const { myPlayerInfo, players, isHost } = get();
       // Cannot set primary role as secondary role
       if (role && role === myPlayerInfo.role) return;
       const updatedPlayer: PlayerInfo = { ...myPlayerInfo, secondaryRole: role };
@@ -1017,13 +1052,23 @@ export const useMissionStore = create<MissionStore>((set, get) => {
       });
 
       if (get().isMultiplayer) {
-        multiplayerService.sendPacket({
-          type: 'ROLE_CLAIM',
-          peerId: myPlayerInfo.peerId,
-          role: myPlayerInfo.role,
-          secondaryRole: role,
-          name: myPlayerInfo.name,
-        });
+        if (isHost) {
+          multiplayerService.broadcastPacket({
+            type: 'ROOM_STATE_SYNC',
+            players: updatedPlayers,
+            missionState: get().missionState,
+            hostPeerId: myPlayerInfo.peerId,
+            destinations: get().destinations,
+          });
+        } else {
+          multiplayerService.sendPacket({
+            type: 'ROLE_CLAIM',
+            peerId: myPlayerInfo.peerId,
+            role: myPlayerInfo.role,
+            secondaryRole: role,
+            name: myPlayerInfo.name,
+          });
+        }
       }
     },
 
