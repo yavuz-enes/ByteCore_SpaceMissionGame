@@ -28,6 +28,7 @@ import {
 import { useMissionStore } from '../../store/missionStore';
 import { useSiteContent } from '../../hooks/useSiteContent';
 import { MissionId, PlayerRole } from '../../types/mission';
+import { multiplayerService } from '../../services/multiplayerService';
 
 const DESTINATION_ARTWORK: Record<string, string> = {
   'lunar-recon': './flight-kit/card-moon-shackleton.webp',
@@ -89,7 +90,8 @@ export const LandingPage: React.FC = () => {
   // Handle Host Create (Station is selected inside the room)
   const handleHostCreate = async () => {
     setConnectingAction('host');
-    const code = (hostRoomCode || Math.random().toString(36).substring(2, 8)).toUpperCase();
+    const rawCode = hostRoomCode.trim() || Math.random().toString(36).substring(2, 8);
+    const code = multiplayerService.normalizeRoomCode(rawCode);
     try {
       await createRoom(code, hostPlayerName || (isTr ? 'Kaptan' : 'Flight Commander'), 'commander');
     } finally {
@@ -99,10 +101,11 @@ export const LandingPage: React.FC = () => {
 
   // Handle Join Room (Station is selected inside the room)
   const handleJoinSubmit = async () => {
-    if (!joinRoomCode.trim()) return;
+    const code = multiplayerService.normalizeRoomCode(joinRoomCode);
+    if (!code) return;
     setConnectingAction('join');
     try {
-      await joinRoom(joinRoomCode.trim().toUpperCase(), joinPlayerName || (isTr ? 'Mürettebat' : 'Crew Member'), 'engineer');
+      await joinRoom(code, joinPlayerName || (isTr ? 'Mürettebat' : 'Crew Member'), 'engineer');
     } finally {
       setConnectingAction(null);
     }

@@ -16,7 +16,7 @@ const PEER_CONFIG = {
       { urls: 'stun:stun3.l.google.com:19302' },
       { urls: 'stun:stun4.l.google.com:19302' },
       { urls: 'stun:stun.cloudflare.com:3478' },
-      // Open Relay Project (Metered) Public STUN & TURN Relay Servers (Port 80 and 443 TCP & UDP for Symmetric NAT traversal)
+      // Open Relay Project (Metered) Public STUN & TURN Relay Servers
       { urls: 'stun:openrelay.metered.ca:80' },
       {
         urls: 'turn:openrelay.metered.ca:80',
@@ -48,19 +48,38 @@ class MultiplayerService {
   private connections: Map<string, DataConnection> = new Map();
   private hostConnection: DataConnection | null = null;
   private packetHandlers: Set<PacketHandler> = new Set();
+  private localChannel: BroadcastChannel | null = null;
+  private keepAliveInterval: any = null;
   
   public isHost: boolean = false;
   public roomCode: string = '';
   public myPeerId: string = '';
   public isConnected: boolean = false;
 
-  private generatePeerId(code: string, isHost: boolean): string {
-    const cleanCode = code
+  public normalizeRoomCode(code: string): string {
+    return (code || '')
       .trim()
+      .replace(/ı/g, 'I')
+      .replace(/i/g, 'I')
+      .replace(/İ/g, 'I')
+      .replace(/ş/g, 'S')
+      .replace(/Ş/g, 'S')
+      .replace(/ğ/g, 'G')
+      .replace(/Ğ/g, 'G')
+      .replace(/ü/g, 'U')
+      .replace(/Ü/g, 'U')
+      .replace(/ö/g, 'O')
+      .replace(/Ö/g, 'O')
+      .replace(/ç/g, 'C')
+      .replace(/Ç/g, 'C')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, '');
+  }
+
+  private generatePeerId(code: string, isHost: boolean): string {
+    const cleanCode = this.normalizeRoomCode(code);
     if (isHost) {
       return `bytecore-mission-${cleanCode}-host`;
     }
@@ -68,13 +87,80 @@ class MultiplayerService {
     return `bytecore-mission-${cleanCode}-client-${rand}`;
   }
 
+  private startKeepAlive() {
+    this.stopKeepAlive();
+    this.keepAliveInterval = setInterval(() => {
+      if (this.peer && !this.peer.destroyed && (this.peer as any).socket) {
+        try {
+          (this.peer as any).socket._send({ type: 'PING' });
+        } catch (e) {
+          // ignore
+        }
+      }
+    }, 15000);
+  }
+
+  private stopKeepAlive() {
+    if (this.keepAliveInterval) {
+      clearInterval(this.keepAliveInterval);
+      this.keepAliveInterval = null;
+    }
+  }
+
+  private setupLocalChannel() {
+    if (typeof BroadcastChannel === 'undefined') return;
+    if (this.localChannel) return;
+
+    try {
+      this.localChannel = new BroadcastChannel('bytecore_mission_control_mesh');
+      this.localChannel.onmessage = (event) => {
+        const msg = event.data;
+        if (!msg || msg.roomCode !== this.roomCode || msg.senderPeerId === this.myPeerId) {
+          return;
+        }
+
+        const packet = msg.packet as NetworkPacket;
+        if (this.isHost) {
+          if (packet.type === 'PLAYER_JOIN') {
+            this.notifyHandlers(packet);
+            return;
+          }
+        }
+        this.notifyHandlers(packet);
+      };
+    } catch (e) {
+      console.warn('BroadcastChannel not initialized:', e);
+    }
+  }
+
+  private sendLocalPacket(packet: NetworkPacket) {
+    if (this.localChannel && this.roomCode) {
+      try {
+        this.localChannel.postMessage({
+          roomCode: this.roomCode,
+          senderPeerId: this.myPeerId,
+          packet,
+        });
+      } catch (e) {
+        // ignore
+      }
+    }
+  }
+
   public createRoom(roomCode: string, hostPlayer: PlayerInfo): Promise<string> {
     return new Promise((resolve, reject) => {
       this.disconnect();
       this.isHost = true;
-      this.roomCode = roomCode.toUpperCase();
+      const cleanCode = this.normalizeRoomCode(roomCode);
+      if (!cleanCode) {
+        reject(new Error('Lütfen geçerli bir oda kodu giriniz (Harf veya rakam).'));
+        return;
+      }
+      this.roomCode = cleanCode;
       const hostId = this.generatePeerId(this.roomCode, true);
       this.myPeerId = hostId;
+
+      this.setupLocalChannel();
 
       let hasResolved = false;
       const timeoutId = setTimeout(() => {
@@ -83,7 +169,7 @@ class MultiplayerService {
           this.disconnect();
           reject(new Error('Sinyal sunucusuna bağlanılamadı (Zaman aşımı). Lütfen internet bağlantınızı kontrol edin.'));
         }
-      }, 25000);
+      }, 20000);
 
       try {
         this.peer = new Peer(hostId, PEER_CONFIG);
@@ -94,7 +180,15 @@ class MultiplayerService {
           clearTimeout(timeoutId);
           this.isConnected = true;
           this.myPeerId = id;
+          this.startKeepAlive();
           resolve(id);
+        });
+
+        this.peer.on('disconnected', () => {
+          console.warn('PeerJS Host disconnected from cloud signal, attempting reconnect...');
+          if (this.peer && !this.peer.destroyed) {
+            this.peer.reconnect();
+          }
         });
 
         this.peer.on('connection', (conn) => {
@@ -107,7 +201,7 @@ class MultiplayerService {
             hasResolved = true;
             clearTimeout(timeoutId);
             if (err?.type === 'unavailable-id') {
-              reject(new Error('Bu oda kodu şu anda kullanımda. Lütfen başka bir kod seçin veya mevcut odanın kapanmasını bekleyin.'));
+              reject(new Error(`Oda kodu (${this.roomCode}) sunucuda şu an kullanımda veya yakın zamanda kapatılmış. Lütfen 30 saniye bekleyin veya farklı bir kod seçin.`));
             } else {
               reject(err);
             }
@@ -127,33 +221,64 @@ class MultiplayerService {
     return new Promise((resolve, reject) => {
       this.disconnect();
       this.isHost = false;
-      this.roomCode = roomCode.toUpperCase();
+      const cleanCode = this.normalizeRoomCode(roomCode);
+      if (!cleanCode) {
+        reject(new Error('Lütfen geçerli bir oda kodu giriniz.'));
+        return;
+      }
+      this.roomCode = cleanCode;
       const clientId = this.generatePeerId(this.roomCode, false);
       const hostId = this.generatePeerId(this.roomCode, true);
       this.myPeerId = clientId;
       clientPlayer.peerId = clientId;
 
       let hasResolved = false;
+
+      // 1. Setup local inter-tab broadcast immediately (Instant multi-tab connection on same computer)
+      this.setupLocalChannel();
+      
+      const localJoinListener = (packet: NetworkPacket) => {
+        if (!hasResolved && (packet.type === 'ROOM_STATE_SYNC' || packet.type === 'MISSION_STATE_UPDATE')) {
+          hasResolved = true;
+          clearTimeout(timeoutId);
+          resolve();
+        }
+      };
+      this.onPacket(localJoinListener);
+
+      // Ping local host right away
+      const initialJoinPacket = {
+        type: 'PLAYER_JOIN' as const,
+        player: {
+          ...clientPlayer,
+          peerId: clientId,
+        },
+      };
+      this.sendLocalPacket(initialJoinPacket);
+      setTimeout(() => {
+        if (!hasResolved) this.sendLocalPacket(initialJoinPacket);
+      }, 300);
+
+      // 2. Global WebRTC connection for cross-network / separate computers
       const timeoutId = setTimeout(() => {
         if (!hasResolved) {
           hasResolved = true;
           this.disconnect();
-          reject(new Error('Kaptana bağlanılamadı (Zaman aşımı). Kaptanın odayı kurduğundan ve kodun doğru olduğundan emin olun.'));
+          reject(new Error(`Kaptana bağlanılamadı (${this.roomCode}). Kaptanın odayı kurduğundan ve kodun doğru olduğundan emin olun.`));
         }
-      }, 25000);
+      }, 20000);
 
       try {
         this.peer = new Peer(clientId, PEER_CONFIG);
 
         this.peer.on('open', () => {
           this.isConnected = true;
+          this.startKeepAlive();
           
           const attemptConnect = (retriesLeft = 3) => {
             if (hasResolved || !this.peer || this.peer.destroyed) return;
 
-            const conn = this.peer.connect(hostId, {
-              reliable: true,
-            });
+            const conn = this.peer.connect(hostId);
             this.hostConnection = conn;
 
             conn.on('open', () => {
@@ -181,7 +306,7 @@ class MultiplayerService {
             conn.on('error', (err) => {
               console.warn('Connection to Host error:', err);
               if (retriesLeft > 0 && !hasResolved) {
-                setTimeout(() => attemptConnect(retriesLeft - 1), 1500);
+                setTimeout(() => attemptConnect(retriesLeft - 1), 1200);
               } else if (!hasResolved) {
                 hasResolved = true;
                 clearTimeout(timeoutId);
@@ -191,12 +316,19 @@ class MultiplayerService {
 
             conn.on('close', () => {
               if (!hasResolved && retriesLeft > 0) {
-                setTimeout(() => attemptConnect(retriesLeft - 1), 1500);
+                setTimeout(() => attemptConnect(retriesLeft - 1), 1200);
               }
             });
           };
 
           attemptConnect(3);
+        });
+
+        this.peer.on('disconnected', () => {
+          console.warn('PeerJS Client disconnected, attempting reconnect...');
+          if (this.peer && !this.peer.destroyed) {
+            this.peer.reconnect();
+          }
         });
 
         this.peer.on('error', (err: any) => {
@@ -290,20 +422,24 @@ class MultiplayerService {
   }
 
   public broadcastPacket(packet: NetworkPacket, excludePeerId?: string) {
+    this.sendLocalPacket(packet);
     this.connections.forEach((conn, peerId) => {
       if (peerId !== excludePeerId && conn.open) {
-        conn.send(packet);
+        try {
+          conn.send(packet);
+        } catch (e) {
+          console.warn('Failed to send packet to peer', peerId, e);
+        }
       }
     });
   }
 
   public sendPacket(packet: NetworkPacket) {
+    this.sendLocalPacket(packet);
     if (this.isHost) {
-      // Host sends to all connected clients
       this.broadcastPacket(packet);
     } else if (this.hostConnection) {
       if (this.hostConnection.open) {
-        // Client sends to host
         this.hostConnection.send(packet);
       } else {
         const onOpen = () => {
@@ -326,14 +462,37 @@ class MultiplayerService {
   }
 
   public disconnect() {
-    this.connections.forEach((c) => c.close());
+    this.stopKeepAlive();
+    if (this.localChannel) {
+      try {
+        this.localChannel.close();
+      } catch (e) {
+        // ignore
+      }
+      this.localChannel = null;
+    }
+    this.connections.forEach((c) => {
+      try {
+        c.close();
+      } catch (e) {
+        // ignore
+      }
+    });
     this.connections.clear();
     if (this.hostConnection) {
-      this.hostConnection.close();
+      try {
+        this.hostConnection.close();
+      } catch (e) {
+        // ignore
+      }
       this.hostConnection = null;
     }
     if (this.peer) {
-      this.peer.destroy();
+      try {
+        this.peer.destroy();
+      } catch (e) {
+        // ignore
+      }
       this.peer = null;
     }
     this.isConnected = false;
