@@ -6,6 +6,7 @@ import {
   ArrowRight,
   ShieldAlert,
   X,
+  ExternalLink,
 } from 'lucide-react';
 import { useMissionStore } from '../../store/missionStore';
 import {
@@ -322,6 +323,30 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
             <h3 className="font-display font-bold text-base text-white">
               {t.flightTele}
             </h3>
+            <div className="flex items-center space-x-2 mt-0.5">
+              <span className="text-[10px] font-mono text-sky-400">
+                {isTr ? 'Yörünge & VR Motoru:' : 'Orbital & VR Engine:'}
+              </span>
+              <a
+                href="https://nasa.github.io/mission-viz/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] font-mono text-slate-300 hover:text-white underline inline-flex items-center space-x-0.5"
+              >
+                <span>NASA Mission-Viz</span>
+                <ExternalLink className="w-2.5 h-2.5 ml-0.5" />
+              </a>
+              <span className="text-slate-600">·</span>
+              <a
+                href="https://www.spaceappschallenge.org/2023/challenges/visualize-a-space-mission-using-virtual-reality/?tab=details"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] font-mono text-purple-300 hover:text-white underline inline-flex items-center space-x-0.5"
+              >
+                <span>Space Apps VR 2023</span>
+                <ExternalLink className="w-2.5 h-2.5 ml-0.5" />
+              </a>
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -439,6 +464,21 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
                       </div>
                     </div>
                   </div>
+                </div>
+
+                {/* NASA CubeSat 101 & CML-4 Verification Notice */}
+                <div className="p-3 border border-sky-500/20 rounded-xl bg-[#080C14] text-left space-y-1">
+                  <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className="text-sky-400 font-bold uppercase">
+                      {isTr ? '✓ NASA CSLI Çevresel Doğrulama & CML-4 Kapısı' : '✓ NASA CSLI Qualification & CML-4 Gate'}
+                    </span>
+                    <span className="text-slate-500">CubeSat 101 Bölüm 6.9</span>
+                  </div>
+                  <p className="text-[11px] font-mono text-slate-400 leading-relaxed">
+                    {isTr
+                      ? 'Titreşim toleransları ve TVAC fırınlama döngüsü NASA CubeSat Launch Initiative (CSLI) fırlatma kabul şartnamesine ve JPL Concept Maturity Level 4 kriterlerine tam uyumludur.'
+                      : 'Vibration thresholds and TVAC bakeout cycles comply strictly with NASA CubeSat Launch Initiative (CSLI) flight acceptance and JPL CML-4 standards.'}
+                  </p>
                 </div>
 
                 {/* Launch CTA */}

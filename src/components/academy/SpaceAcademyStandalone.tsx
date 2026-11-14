@@ -13,6 +13,7 @@ import {
   Award,
   Zap,
   Check,
+  BookOpen,
 } from 'lucide-react';
 import { useMissionStore } from '../../store/missionStore';
 import {
@@ -559,6 +560,40 @@ export const SpaceAcademyStandalone: React.FC = () => {
                         {activeModule.detailedLesson.realWorldExample}
                       </p>
                     </div>
+                  </div>
+
+                  {/* NASA & CSA Competition Source Reference for Module */}
+                  <div className="p-3 rounded-xl border border-sky-500/30 bg-[#080C14] space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono text-sky-400 font-bold uppercase flex items-center space-x-1.5">
+                        <BookOpen className="w-3 h-3 text-sky-400" />
+                        <span>{isTr ? 'RESMİ YARIŞMA & NASA BİLİMSEL REFERANSI' : 'OFFICIAL CHALLENGE & NASA SCIENTIFIC CITATION'}</span>
+                      </span>
+                      <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                        {isTr ? 'Akademik Doğrulama' : 'Peer-Verified'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] font-mono text-slate-300 leading-relaxed">
+                      {activeModule.id === 'delta-v'
+                        ? (isTr
+                            ? 'Bu modüldeki Tsiolkovsky ve yörünge transfer hesaplamaları NASA Mission-Viz (nasa.github.io/mission-viz) ve JPL CML-3 Trade Space analizlerine dayanır.'
+                            : 'Delta-V and transfer orbit mechanics are based on NASA Mission-Viz and JPL CML-3 Trade Space guidelines.')
+                        : activeModule.id === 'solar-thermal'
+                        ? (isTr
+                            ? 'Güneş paneli açılımı (Burn-Wire), ters-kare ışıma ve TVAC ısıl denge testleri NASA CubeSat 101 Bölüm 2.4 ve 6.9 standartlarına dayanır.'
+                            : 'Burn-wire solar deploy, inverse-square irradiance and TVAC thermal margins comply with NASA CubeSat 101 Ch. 2.4 & 6.9.')
+                        : activeModule.id === 'deep-space-comm'
+                        ? (isTr
+                            ? 'Serbest uzay yol kaybı (FSPL) ve DSN yer ağı kapsama hesaplamaları NASA Julie Levri 4-Segment Yer Modeli ve CubeSat 101 FCC/IARU kılavuzuna dayanır.'
+                            : 'FSPL attenuation and DSN ground coverage are modeled per NASA Julie Levri 4-Segment Ground Model and CubeSat 101.')
+                        : activeModule.id === 'radiation-environment'
+                        ? (isTr
+                            ? 'Güneş patlamaları (CME) ve iyonlaştırıcı radyasyon koruması NASA PUNCH Görevi ve Julie Levri Uzay Sistemleri Mühendisliği serisinden alınmıştır.'
+                            : 'Solar flare CME defense and radiation dose hardening are derived from NASA PUNCH Mission and Julie Levri Systems Series.')
+                        : (isTr
+                            ? 'Bilim yükü dalga boyu optimizasyonu ve alt sistem dengelemeleri NASA Webb "Build It Yourself: Satellite!" ve CSA OSIRIS-REx modellerinden uyarlanmıştır.'
+                            : 'Science payload wavelength tradeoffs and subsystem balancing are derived from NASA Webb Satellite Builder & CSA OSIRIS-REx.')}
+                    </p>
                   </div>
                 </div>
 

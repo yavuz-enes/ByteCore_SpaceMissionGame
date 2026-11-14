@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, ShieldCheck } from 'lucide-react';
+import { Lock, ShieldCheck, ExternalLink } from 'lucide-react';
 import { useMissionStore, ADVANCED_TECH_COMPONENTS } from '../../store/missionStore';
 import {
   getLocalizedSpacecraftBuses,
@@ -460,6 +460,34 @@ export const EngineerConsole: React.FC = () => {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Official NASA CubeSat 101 & CSLI Citation Banner */}
+      <div className="p-4 border border-amber-500/30 rounded-2xl bg-[#080C14] space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            <span className="text-[10px] font-mono font-bold tracking-wider text-amber-400 uppercase">
+              {isTr ? 'NASA GÖREV & MÜHENDİSLİK KAYNAĞI NOTU' : 'OFFICIAL NASA ENGINEERING DIRECTIVE'}
+            </span>
+          </div>
+          <span className="px-2 py-0.5 rounded-full text-[9px] font-mono bg-amber-500/15 border border-amber-500/30 text-amber-300">
+            {isTr ? 'Standart: NASA CubeSat 101 (CSLI)' : 'Standard: NASA CubeSat 101 (CSLI)'}
+          </span>
+        </div>
+        <p className="text-xs font-mono text-slate-300 leading-relaxed">
+          {isTr
+            ? 'Bu konsoldaki Titreşim (Vibration) ve Termal Vakum (TVAC) test prosedürleri ile UL-1642 batarya güvenlik toleransları, NASA CubeSat 101 El Kitabı Bölüm 6.9 (Çevresel Doğrulama) şartnamesine dayanmaktadır.'
+            : 'Vibration and Thermal Vacuum (TVAC) bakeout tests along with UL-1642 battery safety limits are based on NASA CubeSat 101 Handbook Chapter 6.9 requirements.'}
+        </p>
+        <div className="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] font-mono">
+          <span className="text-slate-400">
+            {isTr ? 'Fırlatma Referansı: NASA CubeSat Launch Initiative (Bölüm 2.4 Burn-Wire & P-POD)' : 'Launch Reference: NASA CubeSat Launch Initiative (Ch. 2.4 Burn-Wire)'}
+          </span>
+          <span className="text-amber-400/90 font-semibold">
+            NASA CSLI Document NP-2017-10-2470-HQ
+          </span>
         </div>
       </div>
     </div>

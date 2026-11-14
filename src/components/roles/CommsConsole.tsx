@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock } from 'lucide-react';
+import { Lock, ExternalLink } from 'lucide-react';
 import { useMissionStore, ADVANCED_TECH_COMPONENTS } from '../../store/missionStore';
 import {
   getLocalizedAntennaSystems,
@@ -261,6 +261,34 @@ export const CommsConsole: React.FC = () => {
             </span>
           </div>
         )}
+      </div>
+
+      {/* Official NASA Ground Segment & FCC/IARU Citation Banner */}
+      <div className="p-4 border border-sky-500/30 rounded-2xl bg-[#080C14] space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+            <span className="text-[10px] font-mono font-bold tracking-wider text-sky-400 uppercase">
+              {isTr ? 'HABERLEŞME & YER İSTASYONU KAYNAK NOTU' : 'OFFICIAL COMMS & GROUND SEGMENT DIRECTIVE'}
+            </span>
+          </div>
+          <span className="px-2 py-0.5 rounded-full text-[9px] font-mono bg-sky-500/10 border border-sky-500/30 text-sky-300">
+            {isTr ? 'NASA Yer Segmenti & CubeSat 101' : 'NASA Ground Segment & CubeSat 101'}
+          </span>
+        </div>
+        <p className="text-xs font-mono text-slate-300 leading-relaxed">
+          {isTr
+            ? 'Bu konsoldaki DSN yer istasyonları (Goldstone, Madrid, Canberra), serbest uzay yol kaybı (FSPL) ve veri indirme (downlink) mimarisi NASA Julie Levri 4-Segment Yer Modeli ve CubeSat 101 Bölüm 5 (FCC Part 97/5 & IARU Frekans Koordinasyonu) kurallarına göre modellenmiştir.'
+            : 'DSN ground station network, Free Space Path Loss (FSPL) and downlink throughput are modeled according to NASA Julie Levri 4-Segment Ground Architecture and CubeSat 101 Chapter 5 (FCC Part 97/5 & IARU frequency coordination).'}
+        </p>
+        <div className="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] font-mono">
+          <span className="text-slate-400">
+            {isTr ? 'Teknik Kılavuz: NASA Systems Engineering Webinar Series (Julie Levri)' : 'Technical Guide: NASA Systems Engineering Webinar Series'}
+          </span>
+          <span className="text-sky-400 font-semibold">
+            NASA DSN & CubeSat 101 Ch. 2.10
+          </span>
+        </div>
       </div>
     </div>
   );

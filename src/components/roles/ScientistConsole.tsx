@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock } from 'lucide-react';
+import { Lock, ExternalLink } from 'lucide-react';
 import { useMissionStore, ADVANCED_TECH_COMPONENTS } from '../../store/missionStore';
 import {
   getLocalizedScientificInstruments,
@@ -169,6 +169,46 @@ export const ScientistConsole: React.FC = () => {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Official NASA Webb & CSA Citation Banner */}
+      <div className="p-4 border border-emerald-500/30 rounded-2xl bg-[#080C14] space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] font-mono font-bold tracking-wider text-emerald-400 uppercase">
+              {isTr ? 'BİLİM & YARIŞMA KAYNAKLARI NOTU' : 'OFFICIAL SCIENCE & CHALLENGE DIRECTIVE'}
+            </span>
+          </div>
+          <span className="px-2 py-0.5 rounded-full text-[9px] font-mono bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
+            {isTr ? 'Kaynak 1: NASA Webb & Kaynak 4: CSA' : 'Source 1: NASA Webb & Source 4: CSA'}
+          </span>
+        </div>
+        <p className="text-xs font-mono text-slate-300 leading-relaxed">
+          {isTr
+            ? 'Enstrüman seçimi, dalga boyu filtreleme (Kızılötesi/Görünür) ve spektrometre kalibrasyon mimarisi NASA James Webb "Build It Yourself: Satellite!" oyunundan; yüzey tehlike ve krater analizi Canadian Space Agency (CSA) OSIRIS-REx Bennu araştırma modüllerinden uyarlanmıştır.'
+            : 'Instrument payload trades, wavelength filtering (NIR/MIR/Visible) and spectrometer calibration are derived from NASA Webb "Build It Yourself: Satellite!" and CSA OSIRIS-REx Bennu modules.'}
+        </p>
+        <div className="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] font-mono">
+          <a
+            href="https://science.nasa.gov/mission/webb/game-build-it-yourself/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber-400 hover:text-amber-300 underline inline-flex items-center space-x-1"
+          >
+            <span>science.nasa.gov/mission/webb/game-build-it-yourself/</span>
+            <ExternalLink className="w-3 h-3 ml-0.5" />
+          </a>
+          <a
+            href="https://www.asc-csa.gc.ca/eng/youth-educators/digital-games-and-activities.asp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-emerald-400 hover:text-emerald-300 underline inline-flex items-center space-x-1"
+          >
+            <span>asc-csa.gc.ca (CSA Digital Hub)</span>
+            <ExternalLink className="w-3 h-3 ml-0.5" />
+          </a>
         </div>
       </div>
     </div>

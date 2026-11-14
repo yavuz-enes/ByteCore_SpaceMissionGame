@@ -1,4 +1,5 @@
 import React from 'react';
+import { ExternalLink } from 'lucide-react';
 import { useMissionStore } from '../../store/missionStore';
 import {
   getLocalizedScenarios,
@@ -193,6 +194,40 @@ export const CommanderConsole: React.FC = () => {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Official NASA & Challenge Citation Banner */}
+      <div className="p-4 border border-sky-500/30 rounded-2xl bg-[#080C14] space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+            <span className="text-[10px] font-mono font-bold tracking-wider text-sky-400 uppercase">
+              {isTr ? 'NASA GÖREV & YARIŞMA KAYNAĞI NOTU' : 'OFFICIAL NASA & CHALLENGE DIRECTIVE'}
+            </span>
+          </div>
+          <span className="px-2 py-0.5 rounded-full text-[9px] font-mono bg-sky-500/10 border border-sky-500/30 text-sky-300">
+            {isTr ? 'Yarışma Kaynağı 2: NASA Mission-Viz' : 'Challenge Source 2: NASA Mission-Viz'}
+          </span>
+        </div>
+        <p className="text-xs font-mono text-slate-300 leading-relaxed">
+          {isTr
+            ? 'Bu istasyondaki yörünge transfer yayları, yer istasyonu (DSN) görüş konileri ve fırlatma kriterleri NASA Mission-Viz 3D Yörünge Simülatörü ile JPL CML-4 sistem olgunluk matrisine göre hesaplanmaktadır.'
+            : 'Orbital transfer arcs, DSN line-of-sight visibility cones, and launch criteria are based on NASA Mission-Viz 3D tools and JPL CML-4 maturity guidelines.'}
+        </p>
+        <div className="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] font-mono">
+          <span className="text-slate-400">
+            {isTr ? 'Referans Doküman: NASA GSFC Mission Design Lab (MDL)' : 'Reference: NASA GSFC Mission Design Lab (MDL)'}
+          </span>
+          <a
+            href="https://nasa.github.io/mission-viz/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sky-400 hover:text-sky-300 underline inline-flex items-center space-x-1"
+          >
+            <span>nasa.github.io/mission-viz</span>
+            <ExternalLink className="w-3 h-3 ml-0.5" />
+          </a>
         </div>
       </div>
     </div>
