@@ -5,7 +5,8 @@ export type MissionId =
   | 'asteroid-scout'
   | 'sandbox';
 
-export type PlayerRole = 'commander' | 'engineer' | 'scientist' | 'comms';
+export type MissionStationRole = 'commander' | 'engineer' | 'scientist' | 'comms';
+export type PlayerRole = MissionStationRole | 'unassigned';
 
 export interface MissionScenario {
   id: MissionId;

@@ -197,18 +197,7 @@ export const useMissionStore = create<MissionStore>((set, get) => {
     switch (packet.type) {
       case 'PLAYER_JOIN': {
         const existing = state.players.filter((p) => p.peerId !== packet.player.peerId);
-        
-        // Ensure automatic collision-free initial role assignment
-        const takenRoles = existing.map((p) => p.role);
-        let assignedRole = packet.player.role;
-        const allRoles: PlayerRole[] = ['engineer', 'scientist', 'comms', 'commander'];
-        if (takenRoles.includes(assignedRole)) {
-          const freeRole = allRoles.find((r) => !takenRoles.includes(r));
-          if (freeRole) assignedRole = freeRole;
-        }
-
-        const newPlayer = { ...packet.player, role: assignedRole };
-        const updatedPlayers = [...existing, newPlayer];
+        const updatedPlayers = [...existing, packet.player];
         set({ players: updatedPlayers });
 
         // If host, send full sync to everyone
@@ -225,7 +214,7 @@ export const useMissionStore = create<MissionStore>((set, get) => {
             multiplayerService.broadcastPacket(syncPacket);
           }, 350);
         }
-        state.addLogMessage(`[MULTI] ${packet.player.name} joined as ${assignedRole.toUpperCase()}`);
+        state.addLogMessage(`[MULTI] ${packet.player.name} odaya katıldı.`);
         break;
       }
 

@@ -105,7 +105,7 @@ export const LandingPage: React.FC = () => {
     if (!code) return;
     setConnectingAction('join');
     try {
-      await joinRoom(code, joinPlayerName || (isTr ? 'Mürettebat' : 'Crew Member'), 'engineer');
+      await joinRoom(code, joinPlayerName || (isTr ? 'Mürettebat' : 'Crew Member'), 'unassigned');
     } finally {
       setConnectingAction(null);
     }

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
 import { useMissionStore } from '../../store/missionStore';
-import { PlayerRole } from '../../types/mission';
+import { PlayerRole, MissionStationRole } from '../../types/mission';
 import { TRANSLATIONS } from '../../i18n/translations';
 
-const ROLE_AVATARS: Record<PlayerRole, string> = {
+const ROLE_AVATARS: Record<MissionStationRole, string> = {
   commander: './flight-kit/avatar-commander.png',
   engineer: './flight-kit/avatar-engineer.png',
   scientist: './flight-kit/avatar-scientist.png',
@@ -25,7 +25,7 @@ export const RoleNavigation: React.FC = () => {
   const t = TRANSLATIONS[locale].roles;
   const isTr = locale === 'tr';
 
-  const roleList: { id: PlayerRole; label: string }[] = [
+  const roleList: { id: MissionStationRole; label: string }[] = [
     { id: 'commander', label: t.commander.name },
     { id: 'engineer', label: t.engineer.name },
     { id: 'scientist', label: t.scientist.name },

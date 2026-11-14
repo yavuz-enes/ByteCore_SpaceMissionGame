@@ -10,11 +10,11 @@ import {
   Zap,
 } from 'lucide-react';
 import { useMissionStore } from '../../store/missionStore';
-import { PlayerRole } from '../../types/mission';
+import { PlayerRole, MissionStationRole } from '../../types/mission';
 import { TRANSLATIONS } from '../../i18n/translations';
 import { getLocalizedScenarios, TARGET_TRANSLATIONS } from '../../i18n/missionsLocale';
 
-const ROLE_AVATARS: Record<PlayerRole, string> = {
+const ROLE_AVATARS: Record<MissionStationRole, string> = {
   commander: './flight-kit/avatar-commander.png',
   engineer: './flight-kit/avatar-engineer.png',
   scientist: './flight-kit/avatar-scientist.png',
@@ -320,7 +320,7 @@ export const MultiplayerLobbyModal: React.FC<MultiplayerLobbyModalProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Crew Station Slots */}
                   <div className="space-y-2 font-mono text-xs">
-                    {(['commander', 'engineer', 'scientist', 'comms'] as PlayerRole[]).map((role) => {
+                    {(['commander', 'engineer', 'scientist', 'comms'] as MissionStationRole[]).map((role) => {
                       const assigned = players.find((p) => p.role === role);
 
                       return (
