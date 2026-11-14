@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production build outputs
+dist/
+build/
+
+# Local Environment Variables & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# TypeScript build info cache
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# AI Agents & IDE / Local Tool caches
+.agent/
+.agents/
+.gemini/
+.impeccable/
+
+# Raw Adobe Illustrator source files (already exported into public/flight-kit/)
+Orbital-Flight-Kit/ai/
+
+# OS metadata & Editor files
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vscode/
+.idea/

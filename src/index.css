@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Refined Aerospace Colors */
+  --color-void-canvas: #0B0F17;
+  --color-abyss: #0E1422;
+  --color-singularity: #080C14;
+  --color-carbon: #111827;
+  --color-lunar-white: #FFFFFF;
+  --color-platinum: #F1F5F9;
+  --color-mist: #CBD5E1;
+  --color-steel: #94A3B8;
+  --color-gunmetal: rgba(255, 255, 255, 0.08);
+  --gradient-nebula: linear-gradient(83.21deg, rgba(56, 189, 248, 0.15), rgba(99, 102, 241, 0.15));
+  --gradient-plasma: linear-gradient(66.77deg, rgba(244, 63, 94, 0.15), rgba(168, 85, 247, 0.15));
+  --color-aurora-mint: #10B981;
+  --color-plasma-blue: #38BDF8;
+  --color-ultraviolet: #818CF8;
+  --color-electric-cyan: #38BDF8;
+  --color-amber: #F59E0B;
+  --color-signal-blue: #38BDF8;
+
+  /* Fonts */
+  --font-sans: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Mono', 'JetBrains Mono', monospace;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-void-canvas);
+  color: var(--color-lunar-white);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Custom ByteCore Command Bridge Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-singularity);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gunmetal);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-steel);
+}
+
+/* Matte Void Canvas Background */
+.matte-void-canvas {
+  background-color: var(--color-void-canvas);
+}
