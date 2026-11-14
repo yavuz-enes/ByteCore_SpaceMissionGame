@@ -202,13 +202,17 @@ export const useMissionStore = create<MissionStore>((set, get) => {
 
         // If host, send full sync to everyone
         if (state.isHost) {
-          multiplayerService.broadcastPacket({
-            type: 'ROOM_STATE_SYNC',
+          const syncPacket = {
+            type: 'ROOM_STATE_SYNC' as const,
             players: updatedPlayers,
             missionState: state.missionState,
             hostPeerId: state.myPlayerInfo.peerId,
             destinations: state.destinations,
-          });
+          };
+          multiplayerService.broadcastPacket(syncPacket);
+          setTimeout(() => {
+            multiplayerService.broadcastPacket(syncPacket);
+          }, 350);
         }
         state.addLogMessage(`[MULTI] ${packet.player.name} joined as ${packet.player.role.toUpperCase()}`);
         break;

@@ -4,18 +4,35 @@ import { MissionState, PlayerRole } from '../types/mission';
 
 type PacketHandler = (packet: NetworkPacket) => void;
 
-// Robust STUN servers for WebRTC NAT traversal across different networks and devices
+// High-Performance STUN & TURN Relay Infrastructure for Global NAT/Firewall Traversal
 const PEER_CONFIG = {
   debug: 1,
   config: {
     iceServers: [
+      // Google Fast STUN
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
       { urls: 'stun:stun2.l.google.com:19302' },
       { urls: 'stun:stun3.l.google.com:19302' },
       { urls: 'stun:stun4.l.google.com:19302' },
       { urls: 'stun:stun.cloudflare.com:3478' },
-      { urls: 'stun:global.stun.twilio.com:3478' },
+      // Open Relay Project (Metered) Public STUN & TURN Relay Servers (Port 80 and 443 TCP & UDP for Symmetric NAT traversal)
+      { urls: 'stun:openrelay.metered.ca:80' },
+      {
+        urls: 'turn:openrelay.metered.ca:80',
+        username: 'openrelayproject',
+        credential: 'openrelayprojectsecret',
+      },
+      {
+        urls: 'turn:openrelay.metered.ca:443',
+        username: 'openrelayproject',
+        credential: 'openrelayprojectsecret',
+      },
+      {
+        urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+        username: 'openrelayproject',
+        credential: 'openrelayprojectsecret',
+      },
     ],
     iceCandidatePoolSize: 10,
   },
@@ -33,12 +50,17 @@ class MultiplayerService {
   public isConnected: boolean = false;
 
   private generatePeerId(code: string, isHost: boolean): string {
-    const cleanCode = code.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const cleanCode = code
+      .trim()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '');
     if (isHost) {
-      return `nasa-spaceapp-${cleanCode}-host`;
+      return `bytecore-mission-${cleanCode}-host`;
     }
     const rand = Math.random().toString(36).substring(2, 7);
-    return `nasa-spaceapp-${cleanCode}-client-${rand}`;
+    return `bytecore-mission-${cleanCode}-client-${rand}`;
   }
 
   public createRoom(roomCode: string, hostPlayer: PlayerInfo): Promise<string> {
@@ -56,7 +78,7 @@ class MultiplayerService {
           this.disconnect();
           reject(new Error('Sinyal sunucusuna bağlanılamadı (Zaman aşımı). Lütfen internet bağlantınızı kontrol edin.'));
         }
-      }, 12000);
+      }, 25000);
 
       try {
         this.peer = new Peer(hostId, PEER_CONFIG);
@@ -113,7 +135,7 @@ class MultiplayerService {
           this.disconnect();
           reject(new Error('Kaptana bağlanılamadı (Zaman aşımı). Kaptanın odayı kurduğundan ve kodun doğru olduğundan emin olun.'));
         }
-      }, 12000);
+      }, 25000);
 
       try {
         this.peer = new Peer(clientId, PEER_CONFIG);
@@ -121,7 +143,7 @@ class MultiplayerService {
         this.peer.on('open', () => {
           this.isConnected = true;
           
-          const attemptConnect = (retriesLeft = 2) => {
+          const attemptConnect = (retriesLeft = 3) => {
             if (hasResolved || !this.peer || this.peer.destroyed) return;
 
             const conn = this.peer.connect(hostId, {
@@ -134,13 +156,20 @@ class MultiplayerService {
               hasResolved = true;
               clearTimeout(timeoutId);
               this.setupConnection(conn);
-              this.sendPacket({
-                type: 'PLAYER_JOIN',
+
+              const joinPacket = {
+                type: 'PLAYER_JOIN' as const,
                 player: {
                   ...clientPlayer,
                   peerId: clientId,
                 },
-              });
+              };
+
+              this.sendPacket(joinPacket);
+              setTimeout(() => {
+                this.sendPacket(joinPacket);
+              }, 300);
+
               resolve();
             });
 
@@ -162,7 +191,7 @@ class MultiplayerService {
             });
           };
 
-          attemptConnect(2);
+          attemptConnect(3);
         });
 
         this.peer.on('error', (err: any) => {
@@ -188,7 +217,15 @@ class MultiplayerService {
   }
 
   private setupConnection(conn: DataConnection) {
-    this.connections.set(conn.peer, conn);
+    const onReady = () => {
+      this.connections.set(conn.peer, conn);
+    };
+
+    if (conn.open) {
+      onReady();
+    } else {
+      conn.on('open', onReady);
+    }
 
     conn.on('data', (data) => {
       try {
@@ -196,6 +233,7 @@ class MultiplayerService {
         if (this.isHost) {
           if (packet.type === 'PLAYER_JOIN') {
             packet.player.peerId = conn.peer;
+            this.connections.set(conn.peer, conn);
           }
           if (packet.type === 'READY_TOGGLE') {
             packet.peerId = conn.peer;
@@ -240,6 +278,10 @@ class MultiplayerService {
         peerId: conn.peer,
       });
     });
+
+    conn.on('error', (err) => {
+      console.warn('DataConnection error:', err);
+    });
   }
 
   public broadcastPacket(packet: NetworkPacket, excludePeerId?: string) {
@@ -259,9 +301,10 @@ class MultiplayerService {
         // Client sends to host
         this.hostConnection.send(packet);
       } else {
-        this.hostConnection.once('open', () => {
+        const onOpen = () => {
           this.hostConnection?.send(packet);
-        });
+        };
+        this.hostConnection.on('open', onOpen);
       }
     }
   }
