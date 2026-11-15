@@ -451,6 +451,20 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
     return () => clearTimeout(timer);
   }, [pitchCountdown, setFlightStage]);
 
+  // Terminal Countdown Auto-Advance to Liftoff
+  useEffect(() => {
+    if (flightStage === 'countdown') {
+      const timer = setTimeout(() => {
+        const initialTilt = Math.random() > 0.5 ? 17.5 : -17.5;
+        setPitchAngleDeg(initialTilt);
+        setPitchHoldProgress(0);
+        setPitchCountdown(null);
+        setFlightStage('liftoff');
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [flightStage, setFlightStage]);
+
   // -------------------------------------------------------------------------
   // MINI-GAME 2 LOGIC: MAX-Q THROTTLE
   // -------------------------------------------------------------------------
@@ -1027,6 +1041,26 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
                 </span>
               </button>
             </div>
+          </div>
+        )}
+
+        {/* ================================================================= */}
+        {/* COUNTDOWN STAGE: TERMINAL COUNTDOWN HUD                           */}
+        {/* ================================================================= */}
+        {flightStage === 'countdown' && (
+          <div className="max-w-xl w-full border border-sky-500/40 rounded-2xl bg-[#0E1422]/95 backdrop-blur-md p-8 space-y-6 shadow-2xl text-center font-mono animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-center space-x-2 text-sky-400 text-xs uppercase tracking-widest font-bold">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+              <span>{isTr ? 'NİHAİ GERİ SAYIM BAŞLADI' : 'TERMINAL COUNTDOWN INITIATED'}</span>
+            </div>
+            <div className="text-6xl sm:text-7xl font-mono font-bold text-white tracking-wider animate-pulse tabular-nums">
+              T-00:03
+            </div>
+            <p className="text-xs text-slate-300">
+              {isTr
+                ? 'Ana motor ateşleme dizisi devrede. İtki gimbal mini oyunu yükleniyor...'
+                : 'Main engine ignition sequence start. Launch attitude mini-game engaging...'}
+            </p>
           </div>
         )}
 

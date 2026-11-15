@@ -49,13 +49,17 @@ export const App: React.FC = () => {
     );
   }
 
-  // If in Landing Gateway view, render Landing Page + Consensus Modal
+  // If in Landing Gateway view, render Landing Page + Consensus Modal + Flight Simulation Modal
   if (currentView === 'landing') {
     return (
       <div className="w-full max-w-full overflow-x-hidden min-h-screen bg-transparent relative">
         <StarfieldBackground />
         <LandingPage />
         <LaunchConsensusModal />
+        <FlightSimulationModal
+          isOpen={isFlightModalOpen}
+          onClose={() => setIsFlightModalOpen(false)}
+        />
       </div>
     );
   }

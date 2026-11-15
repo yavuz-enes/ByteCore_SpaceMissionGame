@@ -368,7 +368,9 @@ class MultiplayerService {
             packet.type === 'CAMPAIGN_QUEUE_UPDATE' ||
             packet.type === 'LAUNCH_POLL_INIT' ||
             packet.type === 'LAUNCH_POLL_VOTE' ||
-            packet.type === 'LAUNCH_MODAL_SYNC'
+            packet.type === 'LAUNCH_MODAL_SYNC' ||
+            packet.type === 'LAUNCH_STAGE_UPDATE' ||
+            packet.type === 'LAUNCH_START'
           ) {
             this.broadcastPacket(packet, conn.peer);
           }

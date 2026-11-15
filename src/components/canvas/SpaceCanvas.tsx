@@ -363,7 +363,8 @@ export const SpaceCanvas: React.FC = () => {
       {/* Main 3D Canvas */}
       <Canvas
         camera={{ position: [0, 3.8, 8.2], fov: 45 }}
-        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 1.5]}
+        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       >
         {/* Directional Sunlight with Day/Night Terminator Shadows */}
         <directionalLight position={[14, 5, 10]} intensity={2.2} color="#ffffff" />
@@ -371,7 +372,7 @@ export const SpaceCanvas: React.FC = () => {
         <pointLight position={[-12, -4, -8]} intensity={0.25} color="#acafff" />
 
         {/* Deep Space Starfield */}
-        <Stars radius={120} depth={60} count={4000} factor={4.5} saturation={0} fade speed={1.2} />
+        <Stars radius={120} depth={60} count={1200} factor={4.5} saturation={0} fade speed={1.2} />
 
         {/* Orbit View: Celestial Body, AP/PE Trajectory Markers & Modular Satellite */}
         <group>

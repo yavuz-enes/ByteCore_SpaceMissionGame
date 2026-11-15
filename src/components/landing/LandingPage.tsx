@@ -246,25 +246,6 @@ export const LandingPage: React.FC = () => {
             {content.site.heroSubtitle}
           </p>
 
-          {/* Hero CTAs */}
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-            <a
-              href="#lobby"
-              className="px-6 py-2.5 rounded-full bg-white text-slate-950 hover:bg-slate-100 font-semibold text-xs md:text-sm tracking-wider shadow-sm transition-all flex items-center space-x-2"
-            >
-              <Users className="w-4 h-4" />
-              <span>{content.site.createRoomBtn}</span>
-            </a>
-
-            <button
-              onClick={handleSoloStart}
-              className="px-6 py-2.5 rounded-full bg-slate-900/80 border border-slate-700/80 text-slate-200 hover:text-white hover:border-slate-500 text-xs md:text-sm font-semibold transition-all flex items-center space-x-2 cursor-pointer"
-            >
-              <Play className="w-4 h-4" />
-              <span>{content.site.soloExploreBtn}</span>
-            </button>
-          </div>
-
           {/* Game Mode Selection Cards Grid */}
           <div className="pt-6 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto text-left">
             {/* 1. Solo Flight Deck */}

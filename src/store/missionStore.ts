@@ -601,7 +601,10 @@ export const useMissionStore = create<MissionStore>((set, get) => {
       }
 
       case 'LAUNCH_MODAL_SYNC': {
-        set({ isFlightModalOpen: packet.isOpen });
+        set({
+          isFlightModalOpen: packet.isOpen,
+          currentView: packet.isOpen ? 'bridge' : get().currentView,
+        });
         break;
       }
     }
@@ -1188,7 +1191,7 @@ export const useMissionStore = create<MissionStore>((set, get) => {
 
     setFlightStage: (stage: FlightStage) => {
       set({ flightStage: stage });
-      if (get().isMultiplayer && get().isHost) {
+      if (get().isMultiplayer) {
         multiplayerService.sendPacket({
           type: 'LAUNCH_STAGE_UPDATE',
           stage,
@@ -2171,27 +2174,32 @@ export const useMissionStore = create<MissionStore>((set, get) => {
         isDestinationLocked: true,
         destinations: activeDestinations,
         isFlightModalOpen: true,
+        flightStage: 'design',
         launchPoll: null,
       });
 
-      if (state.isMultiplayer && state.isHost) {
-        multiplayerService.broadcastPacket({
+      if (state.isMultiplayer) {
+        multiplayerService.sendPacket({
           type: 'ENTER_MISSION',
           scenarioId: activeDestinations[0],
           destinations: activeDestinations,
         });
-        multiplayerService.broadcastPacket({
+        multiplayerService.sendPacket({
           type: 'LAUNCH_MODAL_SYNC',
           isOpen: true,
         });
+        multiplayerService.sendPacket({
+          type: 'LAUNCH_STAGE_UPDATE',
+          stage: 'design',
+          timestamp: Date.now(),
+        });
       }
 
-      get().startCountdown();
       const isTr = state.locale === 'tr';
       get().addLogMessage(
         isTr
-          ? `[FIRLATMA] Tüm istasyonlar GO verdi! Mürettebatla ortak fırlatma geri sayımı devrede.`
-          : `[LAUNCH] All stations GO! Cooperative flight countdown engaged.`
+          ? `[FIRLATMA] Tüm istasyonlar GO verdi! Uçuş simülasyon köprüsüne geçildi.`
+          : `[LAUNCH] All stations GO! Transitioned to flight simulation deck.`
       );
     },
 
