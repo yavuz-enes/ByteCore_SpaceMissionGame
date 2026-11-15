@@ -25,6 +25,9 @@ import {
   Gauge,
   Layers,
   Sparkles,
+  Wrench,
+  FileText,
+  XCircle,
 } from 'lucide-react';
 import { useMissionStore } from '../../store/missionStore';
 import {
@@ -33,7 +36,7 @@ import {
   getLocalizedOrbitProfiles,
 } from '../../i18n/missionsLocale';
 import { TRANSLATIONS } from '../../i18n/translations';
-import { FlightStage, MissionStationRole } from '../../types/mission';
+import { FlightStage, MissionStationRole, PlayerRole } from '../../types/mission';
 import { multiplayerService } from '../../services/multiplayerService';
 
 interface FlightSimulationModalProps {
@@ -107,6 +110,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
     isHost,
     players,
     myPlayerInfo,
+    setActiveRole,
   } = useMissionStore();
 
   const isTr = locale === 'tr';
@@ -243,6 +247,100 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
     };
   }, [flightStage, isMultiplayer, players, myPlayerInfo, isTr]);
 
+  // Comprehensive Mishap & Root-Cause Debrief Report Analysis
+  const mishapDebrief = useMemo(() => {
+    let category: 'comms' | 'propulsion' | 'power' | 'mass' | 'attitude' | 'general' = 'general';
+    let targetRole: PlayerRole = 'comms';
+    let targetRoleLabel = isTr ? 'Haberleşme İstasyonu' : 'Comms Station';
+    let targetConsoleName = isTr ? 'Haberleşme Subayı Konsolu' : 'Telecommunications Console';
+    let rootCauseTitle = isTr ? 'İletişim Darboğazı & Telemetri Kopması' : 'Critical Comms Bottleneck';
+    let whyFailed = isTr
+      ? 'Bilimsel yüklerin ürettiği veri akışı, yer istasyonunun indirme hızını aştı. Telemetri veri tamponu taştı; kontrol sinyali koptuğu için roket rotadan çıkarak yere düştü.'
+      : 'Payload data generation exceeded ground downlink capacity. Guidance signal severed, resulting in loss of attitude control.';
+    let howToFix = isTr
+      ? "Haberleşme İstasyonu'na gidin. 'High-Gain X/Ka-Band Çanak Anten' veya 'Optik Lazer Link' seçin. Yer istasyonunu kapsama alanı en yüksek (%95) olan 'NASA Deep Space Network (DSN)' olarak güncelleyin."
+      : "Switch to Comms Console. Equip 'High-Gain X/Ka-Band Dish' or 'Optical Laser Link'. Upgrade ground network to 'NASA Deep Space Network (DSN)'.";
+
+    const errors = telemetry.validationErrors;
+    const hasCommsErr = errors.some((e) => e.includes('İletişim') || e.includes('Comms')) || telemetry.dataThroughputKbps < 120;
+    const hasDeltaVErr = !telemetry.deltaVSufficient || errors.some((e) => e.includes('Delta-V'));
+    const hasPowerErr = !telemetry.powerPositive || errors.some((e) => e.includes('Güç') || e.includes('Power'));
+    const hasMassErr = !telemetry.launchCompatibility || errors.some((e) => e.includes('Kütle') || e.includes('Mass'));
+    const hasAttitudeErr = crashReason.includes('Sapma') || crashReason.includes('Attitude') || crashReason.includes('Gimbal');
+
+    if (hasAttitudeErr) {
+      category = 'attitude';
+      targetRole = 'commander';
+      targetRoleLabel = isTr ? 'Uçuş Komutanı İstasyonu' : 'Commander Station';
+      targetConsoleName = isTr ? 'Kalkış Gimbal Kontrol Masası' : 'Liftoff Gimbal Control Desk';
+      rootCauseTitle = isTr ? 'Aşırı İtki Açısı Sapması (Takla Limiti Aşıldı)' : 'Excessive Attitude Deflection';
+      whyFailed = isTr
+        ? 'Kalkış tırmanışı sırasında aerodinamik rüzgar kuvvetleri roketi itti ve itki açısı güvenli ±5° koridorunun dışına çıkarak 25° kritik sapma sınırını aştı. Dinamik sürtünme gövdede takla momentine yol açarak aracı parçaladı.'
+        : 'Aerodynamic cross-winds deflected rocket pitch beyond the ±5° green safety corridor to extreme deflection limits, inducing structural breakup.';
+      howToFix = isTr
+        ? "Kalkış mini oyununda roket yükselirken farenizi sağa/sola hafifçe kaydırarak veya düzeltme butonlarını kullanarak itki açısını yeşil merkez koridorda (0° ±5°) tutun. Yeşil sayaç dolana kadar açıyı koruyarak bir sonraki aşamaya geçin."
+        : "During liftoff, gently move your cursor left/right or use trim buttons to keep rocket attitude within the green center corridor (±5°). Hold attitude until countdown finishes.";
+    } else if (hasCommsErr) {
+      category = 'comms';
+      targetRole = 'comms';
+      targetRoleLabel = isTr ? 'Haberleşme İstasyonu' : 'Comms Station';
+      targetConsoleName = isTr ? 'Haberleşme Subayı Konsolu' : 'Telecommunications Console';
+      rootCauseTitle = isTr ? 'Kritik İletişim Darboğazı & Telemetri Kaybı' : 'Critical Comms Bottleneck';
+      whyFailed = isTr
+        ? `Bilimsel aygıtların ürettiği veri akışı, seçilen anten ve yer istasyonunun indirme hızını (${telemetry.dataThroughputKbps} kbps) aştı. Uçuş sırasında veri tampon belleği taştı; komuta merkeziyle telemetri ve rota kontrol sinyali koptuğu için roket düştü.`
+        : `Scientific payload data generation rate exceeded ground downlink throughput (${telemetry.dataThroughputKbps} kbps). Telemetry and flight guidance links were severed, sending the rocket into an unrecoverable dive.`;
+      howToFix = isTr
+        ? "Haberleşme İstasyonu'na gidin. Anten sisteminizi 'High-Gain X/Ka-Band Çanak' veya 'Optik Lazer Link' olarak değiştirin. Yer istasyonunu dünya genelinde %95 kesintisiz kapsama sunan 'NASA Deep Space Network (DSN)' olarak güncelleyin. İndirme hızının üretilen bilim verisinden yüksek olmasını sağlayın."
+        : "Open Comms Console. Upgrade spacecraft antenna to 'High-Gain X/Ka-Band Dish' or 'Optical Laser Link'. Switch ground network to 'NASA Deep Space Network (DSN)'. Ensure downlink throughput exceeds data rate demand.";
+    } else if (hasDeltaVErr) {
+      category = 'propulsion';
+      targetRole = 'commander';
+      targetRoleLabel = isTr ? 'Uçuş Komutanı İstasyonu' : 'Commander Station';
+      targetConsoleName = isTr ? 'Komuta & İtki Tasarım Konsolu' : 'Command & Propulsion Console';
+      rootCauseTitle = isTr ? 'Yetersiz İtki & Delta-V Rezervi' : 'Insufficient Propulsion & Delta-V';
+      whyFailed = isTr
+        ? `Roketin motor ve yakıt kombinasyonu yalnızca ${telemetry.availableDeltaVMps.toLocaleString()} m/s hız değişimi sağlayabildi; oysa hedefe ulaşmak için minimum ${currentScenario.requiredDeltaV.toLocaleString()} m/s Delta-V gerekiyordu. Araç yerçekimine yenik düştü.`
+        : `Vehicle available delta-V (${telemetry.availableDeltaVMps.toLocaleString()} m/s) failed to satisfy scenario requirement (${currentScenario.requiredDeltaV.toLocaleString()} m/s). Vehicle could not achieve orbital velocity.`;
+      howToFix = isTr
+        ? "Uçuş Komutanı konsoluna gidin. Daha yüksek Isp verimine sahip 'NTP Nükleer Termal İtki' veya 'Bipropellant Kimyasal Motor' seçin ya da fırlatma aracını 'Falcon Heavy' veya 'SLS Block 1'e yükseltin."
+        : "Switch to Commander Console. Equip a higher-Isp engine ('NTP Nuclear Thermal' or 'Bipropellant') or upgrade launch vehicle to 'Falcon Heavy' / 'SLS'.";
+    } else if (hasPowerErr) {
+      category = 'power';
+      targetRole = 'engineer';
+      targetRoleLabel = isTr ? 'Mühendislik İstasyonu' : 'Engineering Station';
+      targetConsoleName = isTr ? 'Baş Mühendis Güç Konsolu' : 'Chief Engineer Power Console';
+      rootCauseTitle = isTr ? 'Negatif Güç Dengesi & Aviyonik Kararması' : 'Negative Power Balance & Blackout';
+      whyFailed = isTr
+        ? `Uzay aracının elektrik üretimi tüketimden düşüktü (${telemetry.netPowerW} W açık). Bataryalar kalkıştan hemen sonra tükendi, uçuş bilgisayarları kapandı ve motor yönlendirmesi kilitlendi.`
+        : `Spacecraft power consumption exceeded generation (${telemetry.netPowerW} W deficit). Batteries exhausted shortly after liftoff, causing flight computer blackout.`;
+      howToFix = isTr
+        ? "Baş Mühendis konsoluna gidin. Güç panellerinizi 'GaAs Yüksek Verimli Paneller' veya 'UltraFlex Solar Array'e yükseltin; bataryanızı 'Li-Ion NMC' veya 'Lityum-Kükürt' olarak seçin. Net gücün pozitif (+W) olmasını sağlayın."
+        : "Switch to Engineer Console. Equip 'GaAs High-Efficiency Panels' or 'UltraFlex Solar Array', and upgrade batteries to Li-Ion NMC. Ensure net power is positive.";
+    } else if (hasMassErr) {
+      category = 'mass';
+      targetRole = 'engineer';
+      targetRoleLabel = isTr ? 'Mühendislik İstasyonu' : 'Engineering Station';
+      targetConsoleName = isTr ? 'Baş Mühendis Kütle & Gövde Konsolu' : 'Chief Engineer Mass & Bus Console';
+      rootCauseTitle = isTr ? 'Aşırı Yük & Kütle Kapasite Aşımı' : 'Launch Mass Limit Exceeded';
+      whyFailed = isTr
+        ? `Aracın toplam kütlesi (${telemetry.totalMassKg.toLocaleString()} kg), roketin azami taşıma sınırını (${currentVehicle.maxPayloadKg.toLocaleString()} kg) aştı. Azami aerodinamik basınç (Max-Q) aşamasında gövde rezonans çatlağı yaşayarak parçalandı.`
+        : `Total spacecraft mass (${telemetry.totalMassKg.toLocaleString()} kg) exceeded launch vehicle structural rating (${currentVehicle.maxPayloadKg.toLocaleString()} kg), causing structural failure at Max-Q.`;
+      howToFix = isTr
+        ? "Baş Mühendis ve Bilim İnsanı konsollarına gidin. Daha hafif bir gövde (SmallSat Bus) seçin veya gereksiz ağır bilimsel enstrümanları optimize ederek toplam kütleyi roket sınırının altına düşürün."
+        : "Switch to Engineer & Scientist Consoles. Choose a lighter spacecraft bus or trim heavy scientific payload instruments.";
+    }
+
+    return {
+      category,
+      targetRole,
+      targetRoleLabel,
+      targetConsoleName,
+      rootCauseTitle,
+      whyFailed,
+      howToFix,
+    };
+  }, [telemetry, currentScenario, currentVehicle, crashReason, isTr]);
+
   // Reset mini-game states on stage transition
   useEffect(() => {
     if (flightStage === 'design') {
@@ -333,6 +431,39 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
 
     return () => clearInterval(interval);
   }, [flightStage, isCrashing]);
+
+  // Attitude Loss Crash Detection in Liftoff (if deflected past ±24° continuously)
+  const extremeTiltCounterRef = useRef(0);
+  useEffect(() => {
+    if (flightStage !== 'liftoff' || isCrashing) {
+      extremeTiltCounterRef.current = 0;
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const currentAngle = pitchAngleDegRef.current;
+      if (Math.abs(currentAngle) >= 23.5) {
+        extremeTiltCounterRef.current += 1;
+        if (extremeTiltCounterRef.current >= 15 && !hasTriggeredCrashRef.current) {
+          hasTriggeredCrashRef.current = true;
+          setIsCrashing(true);
+          setCrashReason(
+            isTr
+              ? 'Aşırı İtki Vektör Sapması: Roket ±5° güvenli uçuş koridorundan tamamen çıktı ve kritik aerodinamik takla sınırına (25°) ulaştı; araç parçalandı.'
+              : 'Extreme Attitude Deflection: Rocket veered beyond ±5° safety corridor to extreme aerodynamic limits, inducing structural breakup.'
+          );
+          setTimeout(() => {
+            setIsCrashing(false);
+            setFlightStage('mission-failed');
+          }, 2800);
+        }
+      } else {
+        extremeTiltCounterRef.current = Math.max(0, extremeTiltCounterRef.current - 1);
+      }
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [flightStage, isCrashing, isTr, setFlightStage]);
 
   // -------------------------------------------------------------------------
   // IN-FLIGHT DEFICIENCY CRASH TRIGGER (Catastrophic collapse if flaws exist)
@@ -642,6 +773,17 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
     setPitchCountdown(null);
   };
 
+  const handleGoToFixConsole = (targetRole: PlayerRole) => {
+    setActiveRole(targetRole);
+    resetToDesign();
+    setPreLaunchConfirmed(false);
+    setIsCrashing(false);
+    setCrashReason('');
+    hasTriggeredAnomalyRef.current = false;
+    hasTriggeredCrashRef.current = false;
+    onClose();
+  };
+
   const handleAdjustPitch = (deltaDeg: number) => {
     if (!currentOperatorInfo.isMe) return;
     setPitchAngleDeg((prev) => Math.max(-25, Math.min(25, Number((prev + deltaDeg).toFixed(1)))));
@@ -767,7 +909,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
           <div className="flex items-center space-x-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)] animate-pulse" />
             <span className="font-display font-bold text-sm sm:text-base tracking-wide text-white">
-              BYTECORE FLIGHT BRIDGE
+              {isTr ? 'BYTECORE UÇUŞ SİMÜLASYONU' : 'BYTECORE FLIGHT SIMULATION'}
             </span>
           </div>
           <span className="text-slate-600 hidden sm:inline">|</span>
@@ -815,7 +957,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full border border-slate-700 flex items-center justify-center text-slate-400 hover:text-white hover:border-slate-500 transition-all cursor-pointer"
-            title={isTr ? 'Uçuş Köprüsünden Çık' : 'Exit Flight Deck'}
+            title={isTr ? 'Uçuş Simülasyonundan Çık' : 'Exit Flight Simulation'}
           >
             <X className="w-4 h-4" />
           </button>
@@ -1662,93 +1804,176 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
         {/* MISSION FAILED / LOSS OF VEHICLE DEBRIEF SCREEN                   */}
         {/* ================================================================= */}
         {flightStage === 'mission-failed' && (
-          <div className="max-w-2xl w-full border border-rose-500/50 rounded-2xl bg-[#0E1422]/95 backdrop-blur-md p-6 md:p-8 space-y-6 shadow-2xl text-center relative overflow-hidden">
+          <div className="max-w-3xl w-full border border-rose-500/60 rounded-2xl bg-[#0E1422]/95 backdrop-blur-md p-5 sm:p-7 md:p-8 space-y-6 shadow-2xl relative overflow-hidden text-left font-mono">
             {/* Ambient Red Alert Glow */}
             <div className="absolute inset-0 bg-rose-500/5 pointer-events-none -z-10" />
 
-            {/* Failure Badge / Icon */}
-            <div className="w-20 h-20 mx-auto rounded-full bg-rose-500/20 border-2 border-rose-500 flex items-center justify-center text-rose-400 shadow-[0_0_30px_rgba(244,63,94,0.35)]">
-              <AlertTriangle className="w-10 h-10 animate-pulse" />
-            </div>
-
-            <div>
-              <span className="text-xs font-mono text-rose-400 font-bold uppercase tracking-widest flex items-center justify-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                <span>{isTr ? 'GÖREV BAŞARISIZ // ARAÇ DÜŞTÜ' : 'MISSION FAILED // LOSS OF VEHICLE'}</span>
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-display font-bold text-white mt-1">
-                {currentScenario.name}
-              </h2>
-            </div>
-
-            {/* Aerospace Mishap Investigation Report */}
-            <div className="p-4 rounded-xl border border-rose-500/40 bg-rose-950/30 text-left font-mono space-y-2">
-              <div className="flex items-center justify-between text-[11px] text-rose-300 font-bold uppercase border-b border-rose-500/30 pb-1.5">
-                <span>{isTr ? 'UÇUŞ KAZASI ARAŞTIRMA RAPORU' : 'FLIGHT MISHAP INVESTIGATION REPORT'}</span>
-                <span className="text-rose-400 font-bold">FATAL ABORT</span>
-              </div>
-              <p className="text-xs text-rose-200/95 leading-relaxed font-sans sm:font-mono">
-                {crashReason || (isTr ? 'Alt sistemlerdeki kritik eksiklikler nedeniyle araç irtifa kaybederek düştü.' : 'Critical subsystem deficiencies led to loss of altitude and vehicle impact.')}
-              </p>
-            </div>
-
-            {/* Diagnostics at Loss Point */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
-              <div className="p-3 border border-slate-800 rounded-xl bg-[#0B0F17]">
-                <span className="text-slate-400 block text-[10px]">{isTr ? 'SON İRTİFA' : 'FINAL ALTITUDE'}</span>
-                <strong className="text-rose-400 text-base font-bold mt-1 block">
-                  0 m ({isTr ? 'Çarpışma' : 'Impact'})
-                </strong>
+            {/* Header with Failure Badge and Status */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-rose-500/30 pb-4">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-12 h-12 rounded-full bg-rose-500/20 border-2 border-rose-500 flex items-center justify-center text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.4)] shrink-0">
+                  <AlertTriangle className="w-6 h-6 animate-pulse" />
+                </div>
+                <div>
+                  <span className="text-[10px] text-rose-400 font-bold uppercase tracking-widest flex items-center space-x-1.5">
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                    <span>{isTr ? 'GÖREV BAŞARISIZ // ARAÇ DÜŞTÜ' : 'MISSION FAILED // LOSS OF VEHICLE'}</span>
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-display font-bold text-white mt-0.5">
+                    {currentScenario.name} · {currentVehicle.name}
+                  </h2>
+                </div>
               </div>
 
-              <div className="p-3 border border-slate-800 rounded-xl bg-[#0B0F17]">
-                <span className="text-slate-400 block text-[10px]">{isTr ? 'GÖVDE DURUMU' : 'HULL STATUS'}</span>
-                <strong className="text-rose-400 text-base font-bold mt-1 block">
-                  {isTr ? 'Parçalandı' : 'Destroyed'}
-                </strong>
-              </div>
-
-              <div className="p-3 border border-slate-800 rounded-xl bg-[#0B0F17]">
-                <span className="text-slate-400 block text-[10px]">{isTr ? 'TELEMETRİ' : 'TELEMETRY'}</span>
-                <strong className="text-rose-400 text-base font-bold mt-1 block">
-                  {isTr ? 'Sinyal Yok' : 'Lost'}
-                </strong>
-              </div>
-
-              <div className="p-3 border border-slate-800 rounded-xl bg-[#0B0F17]">
-                <span className="text-slate-400 block text-[10px]">{isTr ? 'HATALI SİSTEM' : 'DEFECTS'}</span>
-                <strong className="text-amber-400 text-base font-bold mt-1 block">
-                  {telemetry.validationErrors.length} {isTr ? 'Kritik Hata' : 'Errors'}
-                </strong>
+              <div className="flex items-center space-x-2">
+                <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-rose-500/20 border border-rose-500/40 text-rose-300">
+                  {isTr ? 'KAZA ARAŞTIRMA RAPORU' : 'MISHAP DEBRIEF'}
+                </span>
               </div>
             </div>
 
-            {/* Corrective Guidance */}
-            <div className="p-3 rounded-xl border border-slate-800 bg-[#0B0F17] text-left text-xs font-mono text-slate-300">
-              <span className="text-sky-400 font-bold block mb-1">
-                {isTr ? '💡 DÜZELTME TAVSİYESİ:' : '💡 CORRECTIVE RECOMMENDATION:'}
-              </span>
-              <span>
-                {isTr
-                  ? 'Haberleşme istasyonuna giderek daha yüksek kazançlı anten veya DSN yer istasyonu seçerek darboğazı giderin. İtki ve güç sistemlerini yeşil nominal sınırlara getirin.'
-                  : 'Resolve comms bottlenecks by choosing a higher-gain antenna or DSN ground station. Ensure delta-V and power reserves meet required thresholds.'}
-              </span>
+            {/* Two Comprehensive Core Cards: 1. Neden Yanlış Oldu? | 2. Doğrusu Nasıl Olmalıydı? */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Card 1: NEDEN YANLIŞ OLDU? */}
+              <div className="p-4 sm:p-5 rounded-2xl border border-rose-500/50 bg-rose-950/25 space-y-3 shadow-md">
+                <div className="flex items-center space-x-2 text-rose-300 font-bold uppercase text-xs border-b border-rose-500/30 pb-2">
+                  <XCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>{isTr ? '🚨 NEDEN YANLIŞ OLDU? (KÖK NEDEN)' : '🚨 WHY IT FAILED (ROOT CAUSE)'}</span>
+                </div>
+                <div className="text-white font-bold text-sm">
+                  {mishapDebrief.rootCauseTitle}
+                </div>
+                <p className="text-xs text-rose-200/90 leading-relaxed font-sans sm:font-mono">
+                  {mishapDebrief.whyFailed}
+                </p>
+                <div className="pt-1 text-[10px] text-rose-300/80 border-t border-rose-500/20 flex items-center justify-between">
+                  <span>{isTr ? 'Kaza Durumu:' : 'Accident Type:'}</span>
+                  <span className="font-bold text-rose-300 uppercase">{mishapDebrief.category.toUpperCase()} FAILURE</span>
+                </div>
+              </div>
+
+              {/* Card 2: DOĞRUSU NASIL OLMALIYDI? */}
+              <div className="p-4 sm:p-5 rounded-2xl border border-emerald-500/50 bg-emerald-950/25 space-y-3 shadow-md">
+                <div className="flex items-center space-x-2 text-emerald-300 font-bold uppercase text-xs border-b border-emerald-500/30 pb-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{isTr ? '✅ DOĞRUSU NASIL OLMALIYDI? (ÇÖZÜM)' : '✅ CORRECT SOLUTION (HOW TO FIX)'}</span>
+                </div>
+                <div className="flex items-center space-x-2 text-sky-300 font-bold text-sm">
+                  <Wrench className="w-4 h-4 text-sky-400 shrink-0" />
+                  <span>{mishapDebrief.targetConsoleName}</span>
+                </div>
+                <p className="text-xs text-emerald-200/95 leading-relaxed font-sans sm:font-mono">
+                  {mishapDebrief.howToFix}
+                </p>
+                <div className="pt-1 text-[10px] text-emerald-300/80 border-t border-emerald-500/20 flex items-center justify-between">
+                  <span>{isTr ? 'Sorumlu İstasyon:' : 'Responsible Station:'}</span>
+                  <span className="font-bold text-sky-300 uppercase">{mishapDebrief.targetRoleLabel}</span>
+                </div>
+              </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            {/* Subsystem Telemetry Comparison Table */}
+            <div className="border border-white/10 rounded-xl overflow-hidden bg-[#080C14] text-xs">
+              <div className="bg-[#0B0F17] px-4 py-2 border-b border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-300 uppercase">
+                <span>{isTr ? 'ALT SİSTEM METRİK DENETİMİ' : 'SUBSYSTEM TELEMETRY AUDIT'}</span>
+                <span>{isTr ? 'MEVCUT DEĞER vs. GÜVENLİ SINIR' : 'ACTUAL vs. NOMINAL THRESHOLD'}</span>
+              </div>
+              <div className="divide-y divide-slate-800/80">
+                {/* Comms */}
+                <div className="px-4 py-2.5 flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <Radio className={`w-3.5 h-3.5 shrink-0 ${!telemetry.validationErrors.some((e) => e.includes('İletişim') || e.includes('Comms')) ? 'text-emerald-400' : 'text-rose-400'}`} />
+                    <span className="text-slate-300 truncate">{isTr ? 'Bilimsel Veri İndirme (Throughput)' : 'Science Downlink'}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+                    <span className="tabular-nums text-slate-400">
+                      {telemetry.dataThroughputKbps} kbps Link
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${!telemetry.validationErrors.some((e) => e.includes('İletişim') || e.includes('Comms')) ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'}`}>
+                      {!telemetry.validationErrors.some((e) => e.includes('İletişim') || e.includes('Comms')) ? (isTr ? 'NOMİNAL' : 'NOMINAL') : (isTr ? 'DARBOĞAZ ❌' : 'BOTTLENECK ❌')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Delta-V */}
+                <div className="px-4 py-2.5 flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <Flame className={`w-3.5 h-3.5 shrink-0 ${telemetry.deltaVSufficient ? 'text-emerald-400' : 'text-rose-400'}`} />
+                    <span className="text-slate-300 truncate">{isTr ? 'İtki Kapasitesi (Delta-V)' : 'Propulsion Delta-V'}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+                    <span className="tabular-nums text-slate-400">
+                      {telemetry.availableDeltaVMps.toLocaleString()} / {currentScenario.requiredDeltaV.toLocaleString()} m/s
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${telemetry.deltaVSufficient ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'}`}>
+                      {telemetry.deltaVSufficient ? (isTr ? 'YETERLİ' : 'NOMINAL') : (isTr ? 'YETERSİZ ❌' : 'DEFICIT ❌')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Power */}
+                <div className="px-4 py-2.5 flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <Zap className={`w-3.5 h-3.5 shrink-0 ${telemetry.powerPositive ? 'text-emerald-400' : 'text-rose-400'}`} />
+                    <span className="text-slate-300 truncate">{isTr ? 'Net Güç Dengesi' : 'Net Power Margin'}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+                    <span className="tabular-nums text-slate-400">
+                      {telemetry.netPowerW > 0 ? `+${telemetry.netPowerW}` : telemetry.netPowerW} W (Min: &gt;0 W)
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${telemetry.powerPositive ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'}`}>
+                      {telemetry.powerPositive ? (isTr ? 'POZİTİF' : 'POSITIVE') : (isTr ? 'GÜÇ AÇIĞI ❌' : 'DEFICIT ❌')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Mass */}
+                <div className="px-4 py-2.5 flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2 min-w-0">
+                    <Layers className={`w-3.5 h-3.5 shrink-0 ${telemetry.launchCompatibility ? 'text-emerald-400' : 'text-rose-400'}`} />
+                    <span className="text-slate-300 truncate">{isTr ? 'Fırlatma Kütle Limiti' : 'Launch Mass Rating'}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+                    <span className="tabular-nums text-slate-400">
+                      {telemetry.totalMassKg.toLocaleString()} / {currentVehicle.maxPayloadKg.toLocaleString()} kg
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${telemetry.launchCompatibility ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'}`}>
+                      {telemetry.launchCompatibility ? (isTr ? 'UYGUN' : 'VALID') : (isTr ? 'AŞIM ❌' : 'OVERLOAD ❌')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons: Prescriptive Action, Reset & Exit */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/10 pt-4">
               <button
-                onClick={handleResetFlight}
-                className="w-full sm:w-auto px-8 py-3 rounded-full bg-white text-slate-950 hover:bg-slate-100 font-mono font-bold text-xs transition-all cursor-pointer shadow-md"
+                onClick={() => handleGoToFixConsole(mishapDebrief.targetRole)}
+                className="w-full sm:w-auto px-6 py-3 rounded-full bg-white text-slate-950 hover:bg-slate-100 font-bold text-xs transition-all flex items-center justify-center space-x-2 cursor-pointer shadow-lg hover:shadow-xl group"
               >
-                {isTr ? 'Yeniden Tasarla & Hataları Düzelt' : 'Redesign & Fix Deficiencies'}
+                <Wrench className="w-3.5 h-3.5 text-slate-950 group-hover:rotate-45 transition-transform" />
+                <span>
+                  {isTr
+                    ? `🎯 ${mishapDebrief.targetRoleLabel.toUpperCase()} İÇİN DÜZELTMEYE GİT`
+                    : `🎯 GO TO ${mishapDebrief.targetRoleLabel.toUpperCase()} & FIX ERRORS`}
+                </span>
               </button>
-              <button
-                onClick={onClose}
-                className="w-full sm:w-auto px-6 py-3 rounded-full border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 font-mono text-xs transition-all cursor-pointer"
-              >
-                {isTr ? 'Uçuş Köprüsünden Çık' : 'Exit Flight Deck'}
-              </button>
+
+              <div className="flex items-center space-x-2 w-full sm:w-auto">
+                <button
+                  onClick={handleResetFlight}
+                  className="flex-1 sm:flex-initial px-5 py-3 rounded-full border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white font-medium text-xs transition-all cursor-pointer flex items-center justify-center space-x-1.5"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>{isTr ? 'Yeniden Dene' : 'Retry'}</span>
+                </button>
+                <button
+                  onClick={onClose}
+                  className="flex-1 sm:flex-initial px-5 py-3 rounded-full border border-slate-700 hover:border-slate-500 text-slate-400 hover:text-white font-medium text-xs transition-all cursor-pointer"
+                >
+                  {isTr ? 'Kapat' : 'Dismiss'}
+                </button>
+              </div>
             </div>
           </div>
         )}

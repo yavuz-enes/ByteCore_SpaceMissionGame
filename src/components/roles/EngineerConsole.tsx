@@ -148,7 +148,19 @@ export const EngineerConsole: React.FC = () => {
           </div>
 
           {/* TVAC */}
-          <div className="p-3 border border-slate-800 rounded-2xl overflow-hidden bg-[#0B0F17] flex flex-col justify-between space-y-2">
+          <div className="p-3 border border-slate-800 rounded-2xl overflow-hidden bg-[#0B0F17] flex flex-col justify-between space-y-2.5">
+            <div className="relative w-full h-24 rounded-xl overflow-hidden bg-[#080C14] border border-white/10">
+              <img
+                src="./flight-kit/eng-tvac-chamber.webp"
+                alt="Thermal Vacuum (TVAC) Chamber"
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/20 to-transparent" />
+              <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-black/75 border border-white/20 text-purple-300">
+                CRYO VACUUM
+              </span>
+            </div>
             <div className="flex items-center justify-between">
               <span className="text-slate-400 uppercase font-bold text-[11px]">
                 {isTr ? 'TVAC ODASI' : 'TVAC CHAMBER'}

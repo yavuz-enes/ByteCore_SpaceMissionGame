@@ -222,20 +222,20 @@ const FALLBACK_SITE_CONTENT: SiteContentData = {
       tagline: "Derin Uzay Çok Oyunculu Sistem Mühendisliği",
       badge: "UZAY SİMÜLASYONU",
       heroTitle: "TASARLA. SİMÜLE ET. KEŞFET.",
-      heroSubtitle: "Gerçek zamanlı iş birlikli yörünge görev simülatörü. Çok operatörlü görev köprüsünde bir araya gelin; Güneş Sistemi boyunca fırlatma bütçesini, yörünge rotalarını, güç dengesini ve derin uzay bilim hasadını yönetin.",
+      heroSubtitle: "Gerçek zamanlı iş birlikli yörünge görev simülatörü. Çok operatörlü görev simülasyonunda bir araya gelin; Güneş Sistemi boyunca fırlatma bütçesini, yörünge rotalarını, güç dengesini ve derin uzay bilim hasadını yönetin.",
       startMissionBtn: "GÖREVE BAŞLA",
       waitingCrewBtn: "MÜRETTEBAT BEKLENİYOR (EN AZ 2 KİŞİ)",
       createRoomBtn: "ODA OLUŞTUR",
       joinRoomBtn: "ODAYA KATIL",
       activeLobbyBadge: "GÖREV LOBİSİ",
-      soloExploreBtn: "TEK KİŞİLİK UÇUŞ KÖPRÜSÜ"
+      soloExploreBtn: "TEK KİŞİLİK UÇUŞ SİMÜLASYONU"
     },
     team: {
       title: "BYTECORE EKİBİ",
       subtitle: "ByteCore Görev Simülatörünün arkasındaki disiplinlerarası havacılık ve uzay sistem mühendisliği ekibi.",
       name: "BYTECORE EKİBİ",
       callsign: "BYTECORE-EKİBİ",
-      missionStatement: "Misyonumuz, özgün uzay görevi mimarisini herkes için erişilebilir kılmaktır. Tsiolkovsky yörünge mekaniğini, ters kare güneş radyasyonu modellerini ve eşler arası iş birlikli görev kontrol köprülerini birleştirerek, insanlığın en cüretkar gezegenler arası ufuklarını keşfedecek yeni nesil uzay mühendislerine ilham veriyoruz.",
+      missionStatement: "Misyonumuz, özgün uzay görevi mimarisini herkes için erişilebilir kılmaktır. Tsiolkovsky yörünge mekaniğini, ters kare güneş radyasyonu modellerini ve eşler arası iş birlikli görev kontrol sistemlerini birleştirerek, insanlığın en cüretkar gezegenler arası ufuklarını keşfedecek yeni nesil uzay mühendislerine ilham veriyoruz.",
       members: [
         {
           name: "Enes Yavuz Özgen",

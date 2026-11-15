@@ -267,7 +267,7 @@ export const LandingPage: React.FC = () => {
               <div className="p-4 space-y-1.5 flex-1 flex flex-col justify-between">
                 <div>
                   <h3 className="font-display font-bold text-sm sm:text-base text-white group-hover:text-sky-300 transition-colors">
-                    {isTr ? 'Tek Kişilik Uçuş Köprüsü' : 'Solo Flight Deck'}
+                    {isTr ? 'Tek Kişilik Uçuş Simülasyonu' : 'Solo Flight Simulation'}
                   </h3>
                   <p className="text-xs text-slate-400 font-mono leading-relaxed">
                     {isTr
@@ -277,7 +277,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <div className="pt-2 flex items-center space-x-1.5 text-xs font-mono text-sky-400 font-semibold">
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>{isTr ? 'Köprüye Gir ➔' : 'Launch Deck ➔'}</span>
+                  <span>{isTr ? 'Simülasyona Başla ➔' : 'Start Simulation ➔'}</span>
                 </div>
               </div>
             </div>
@@ -361,7 +361,7 @@ export const LandingPage: React.FC = () => {
           {/* Section Header */}
           <div className="text-center space-y-2">
             <h2 className="text-3xl md:text-4xl font-display font-medium text-white">
-              {isTr ? 'Hedef Seçin ve Uçuş Köprüsünü Kurun' : 'Select Destination & Form Flight Crew'}
+              {isTr ? 'Hedef Seçin ve Uçuş Simülasyonunu Kurun' : 'Select Destination & Form Flight Crew'}
             </h2>
           </div>
 

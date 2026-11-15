@@ -110,7 +110,7 @@ export const LaunchConsensusModal: React.FC = () => {
               <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
               <span>
                 {isTr
-                  ? 'Fırlatma iptal edildi. Mürettebat hazır olana kadar sistem tasarım köprüsünde kalınacak.'
+                  ? 'Fırlatma iptal edildi. Mürettebat hazır olana kadar sistem tasarım konsolunda kalınacak.'
                   : 'Launch aborted. Mission hold active until all crew members are ready.'}
               </span>
             </div>

@@ -2198,8 +2198,8 @@ export const useMissionStore = create<MissionStore>((set, get) => {
       const isTr = state.locale === 'tr';
       get().addLogMessage(
         isTr
-          ? `[FIRLATMA] Tüm istasyonlar GO verdi! Uçuş simülasyon köprüsüne geçildi.`
-          : `[LAUNCH] All stations GO! Transitioned to flight simulation deck.`
+          ? `[FIRLATMA] Tüm istasyonlar GO verdi! Uçuş simülasyonuna geçildi.`
+          : `[LAUNCH] All stations GO! Transitioned to flight simulation.`
       );
     },
 

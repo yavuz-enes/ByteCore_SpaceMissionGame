@@ -831,6 +831,6 @@ export const getAcademyUI = (locale: Locale) => {
       ? 'Tüm 5 modül teorik, simülasyon ve telafi döngüleriyle başarıyla tamamlanmış ve uzay uçuş operasyonları için tam yetkinlik onaylanmıştır.'
       : 'All 5 core aerospace modules verified via theory, real-time simulation, and adaptive remediation loops. Full flight operations clearance granted.',
     serialNumber: isTr ? 'Sertifika Seri No' : 'Serial Number',
-    launchRealMissionBtn: isTr ? 'UÇUŞ KÖPRÜSÜNE GİR & FIRLATMAYA BAŞLA' : 'ENTER BRIDGE & PROCEED TO LAUNCH',
+    launchRealMissionBtn: isTr ? 'UÇUŞ SİMÜLASYONUNA GİR & FIRLATMAYA BAŞLA' : 'ENTER FLIGHT SIMULATION & PROCEED TO LAUNCH',
   };
 };
