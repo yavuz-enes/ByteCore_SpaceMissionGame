@@ -99,15 +99,15 @@ const FALLBACK_SITE_CONTENT: SiteContentData = {
         },
         {
           name: "Enes Kalmaz",
-          role: "Systems Engineer",
-          callsign: "ENG",
-          bio: "Orbital mechanics calculation, subsystem power budgets, and propulsion dynamics."
+          role: "Physics & Systems Calculation",
+          callsign: "PHYSICS",
+          bio: "Rocket dynamics, orbital transfer equations, and qualification testing."
         },
         {
           name: "Taner Birtek",
-          role: "Mission Engineer",
-          callsign: "OPS",
-          bio: "Flight operations, science payload profiles, and telemetry verification."
+          role: "Research & Documentation",
+          callsign: "RESEARCH",
+          bio: "NASA scientific data research, mission scenario design, and documentation."
         }
       ]
     },
@@ -251,15 +251,15 @@ const FALLBACK_SITE_CONTENT: SiteContentData = {
         },
         {
           name: "Enes Kalmaz",
-          role: "Sistem Mühendisi",
-          callsign: "SİSTEM",
-          bio: "Yörünge mekaniği hesaplamaları, alt sistem güç bütçeleri ve itki dinamiği."
+          role: "Fizik & Sistem Hesaplama",
+          callsign: "FİZİK",
+          bio: "Roket fiziği, yörünge transfer denklemleri ve sistem yeterlilik testleri."
         },
         {
           name: "Taner Birtek",
-          role: "Görev Mühendisi",
-          callsign: "GÖREV",
-          bio: "Uçuş operasyonları, bilimsel faydalı yük profilleri ve telemetri doğrulaması."
+          role: "Araştırma & Dokümantasyon",
+          callsign: "ARAŞTIRMA",
+          bio: "NASA kaynak araştırmaları, görev senaryoları ve proje sunum/metin hazırlığı."
         }
       ]
     },
