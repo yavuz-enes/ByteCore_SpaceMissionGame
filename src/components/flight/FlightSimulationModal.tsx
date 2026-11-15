@@ -142,8 +142,11 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
 
   // -------------------------------------------------------------------------
   // MINI-GAME 1: LIFT-OFF PITCH GIMBAL ALIGNMENT
-  // -------------------------------------------------------------------------
-  const [pitchAngleDeg, setPitchAngleDeg] = useState(0);
+  // Starts with initial deflection tilt so player must steer rocket upright
+  const [pitchAngleDeg, setPitchAngleDeg] = useState(17.0);
+  const pitchAngleDegRef = useRef(17.0);
+  pitchAngleDegRef.current = pitchAngleDeg;
+  const hasTriggeredLiftoffAdvanceRef = useRef(false);
   const [pitchHoldProgress, setPitchHoldProgress] = useState(0);
   const [pitchCountdown, setPitchCountdown] = useState<number | null>(null);
 
@@ -252,7 +255,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
       setLiveQPressureKPa(0);
       setLiveGForce(1.0);
       setLiveFuelPercent(100);
-      setPitchAngleDeg(0);
+      setPitchAngleDeg(17.0);
       setPitchHoldProgress(0);
       setPitchCountdown(null);
       setMaxQHoldSeconds(0);
@@ -280,9 +283,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
 
     const interval = setInterval(() => {
       setLiveAltM((prev) => {
-        if (isCrashing) {
-          return Math.max(0, prev - 450);
-        }
+        if (isCrashing) return Math.max(0, prev - 450);
         let delta = 40;
         if (flightStage === 'liftoff') delta = 180;
         else if (flightStage === 'max-q') delta = 850;
@@ -290,28 +291,22 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
         else if (flightStage === 'transfer-cruise') delta = 4500;
         else if (flightStage === 'orbital-burn') delta = 1200;
         else if (flightStage === 'solar-deploy' || flightStage === 'science-pass') delta = 50;
-        const nextAlt = prev + delta;
-        updateSimTelemetry(Math.round(delta / 1000), 0, 0, 0);
-        return nextAlt;
+        return prev + delta;
       });
 
       setLiveVelMps((prev) => {
-        if (isCrashing) {
-          return Math.max(0, prev - 140);
-        }
+        if (isCrashing) return Math.max(0, prev - 140);
         let delta = 15;
         if (flightStage === 'liftoff') delta = 45;
         else if (flightStage === 'max-q') delta = 120;
         else if (flightStage === 'stage-sep') delta = 280;
         else if (flightStage === 'transfer-cruise') delta = 50;
         else if (flightStage === 'orbital-burn') delta = -40; // Braking capture burn
-        const nextVel = Math.max(0, Math.min(11200, prev + delta));
-        updateSimTelemetry(0, Math.round(delta), 0, 0);
-        return nextVel;
+        return Math.max(0, Math.min(11200, prev + delta));
       });
 
       // Dynamic pressure curve (Peaks around 35-40 kPa at ~12-14 km altitude)
-      setLiveQPressureKPa((_) => {
+      setLiveQPressureKPa(() => {
         if (isCrashing) return 58.4 + Math.random() * 4.0;
         if (flightStage === 'liftoff') return Math.min(28, 12 + Math.random() * 4);
         if (flightStage === 'max-q') return 35.8 + Math.random() * 2.2;
@@ -320,7 +315,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
       });
 
       // G-force
-      setLiveGForce((_) => {
+      setLiveGForce(() => {
         if (isCrashing) return 4.5 + Math.random() * 2.0;
         if (flightStage === 'liftoff') return 1.4 + Math.random() * 0.2;
         if (flightStage === 'max-q') return 2.8 + Math.random() * 0.4;
@@ -334,10 +329,10 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
         if (isCrashing) return Math.max(0, prev - 1.2);
         return Math.max(12, prev - 0.25);
       });
-    }, 200);
+    }, 250);
 
     return () => clearInterval(interval);
-  }, [flightStage, isCrashing, updateSimTelemetry]);
+  }, [flightStage, isCrashing]);
 
   // -------------------------------------------------------------------------
   // IN-FLIGHT DEFICIENCY CRASH TRIGGER (Catastrophic collapse if flaws exist)
@@ -401,32 +396,31 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
   // MINI-GAME 1 LOGIC: PITCH GIMBAL ATTITUDE CORRIDOR
   // -------------------------------------------------------------------------
   useEffect(() => {
-    if (flightStage !== 'liftoff') return;
+    if (flightStage !== 'liftoff') {
+      hasTriggeredLiftoffAdvanceRef.current = false;
+      return;
+    }
 
     // Wind drift perturbance
     const windInterval = setInterval(() => {
       setPitchAngleDeg((prev) => {
-        const drift = (Math.random() - 0.5) * 4.5;
+        const drift = (Math.random() - 0.5) * 4.0;
         return Math.max(-25, Math.min(25, Number((prev + drift).toFixed(1))));
       });
     }, 450);
 
-    // Corridor hold timer
+    // Corridor hold timer (uses ref for zero cascading re-render overhead)
     const holdInterval = setInterval(() => {
-      setPitchAngleDeg((currentAngle) => {
-        if (Math.abs(currentAngle) <= 5.5) {
-          setPitchHoldProgress((p) => {
-            if (p >= 100) {
-              return 100;
-            }
-            return p + 6;
-          });
-        } else {
-          setPitchHoldProgress((p) => Math.max(0, p - 4));
-        }
-        return currentAngle;
-      });
-    }, 180);
+      const currentAngle = pitchAngleDegRef.current;
+      if (Math.abs(currentAngle) <= 5.5) {
+        setPitchHoldProgress((p) => {
+          if (p >= 100) return 100;
+          return p + 6;
+        });
+      } else {
+        setPitchHoldProgress((p) => Math.max(0, p - 3));
+      }
+    }, 200);
 
     return () => {
       clearInterval(windInterval);
@@ -434,23 +428,28 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
     };
   }, [flightStage]);
 
-  // Trigger countdown when pitch is fully aligned
+  // Trigger countdown when pitch is fully aligned (once)
   useEffect(() => {
-    if (flightStage === 'liftoff' && pitchHoldProgress >= 100 && pitchCountdown === null && !isCrashing) {
+    if (flightStage === 'liftoff' && pitchHoldProgress >= 100 && !hasTriggeredLiftoffAdvanceRef.current && !isCrashing) {
+      hasTriggeredLiftoffAdvanceRef.current = true;
       setPitchCountdown(3);
-      let count = 3;
-      const countTimer = setInterval(() => {
-        count -= 1;
-        if (count <= 0) {
-          clearInterval(countTimer);
-          setFlightStage('max-q');
-          setPitchCountdown(null);
-        } else {
-          setPitchCountdown(count);
-        }
-      }, 1000);
     }
-  }, [flightStage, pitchHoldProgress, pitchCountdown, setFlightStage]);
+  }, [flightStage, pitchHoldProgress, isCrashing]);
+
+  // Clean decrement countdown timer and stage transition
+  useEffect(() => {
+    if (pitchCountdown === null || pitchCountdown <= 0) return;
+    const timer = setTimeout(() => {
+      if (pitchCountdown <= 1) {
+        setPitchCountdown(null);
+        setFlightStage('max-q');
+      } else {
+        setPitchCountdown((prev) => (prev !== null ? prev - 1 : null));
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [pitchCountdown, setFlightStage]);
 
   // -------------------------------------------------------------------------
   // MINI-GAME 2 LOGIC: MAX-Q THROTTLE
@@ -570,14 +569,14 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
     return () => clearInterval(streamInterval);
   }, [flightStage, dsnCarrierTuned, setFlightStage]);
 
-  // Anomaly 15s Countdown
+  // Anomaly 45s Countdown & Multiplayer Fast-Forward
   useEffect(() => {
     if (!activeAnomaly) {
-      setAnomalyTimer(15);
+      setAnomalyTimer(45);
       return;
     }
 
-    setAnomalyTimer(activeAnomaly.urgencySeconds || 15);
+    setAnomalyTimer(activeAnomaly.urgencySeconds || 45);
     const interval = setInterval(() => {
       setAnomalyTimer((prev) => {
         if (prev <= 1) {
@@ -594,12 +593,26 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
     return () => clearInterval(interval);
   }, [activeAnomaly, tallyAndResolveAnomaly]);
 
+  // Fast-forward anomaly when all crew members have voted in multiplayer
+  useEffect(() => {
+    if (isMultiplayer && isHost && activeAnomaly) {
+      const totalCrew = Math.max(1, players.length);
+      if (Object.keys(anomalyVotes).length >= totalCrew) {
+        tallyAndResolveAnomaly();
+      }
+    }
+  }, [anomalyVotes, isMultiplayer, isHost, activeAnomaly, players.length, tallyAndResolveAnomaly]);
+
   if (!isOpen) return null;
 
   // Handlers
   const handleConfirmPreLaunch = () => {
     setPreLaunchConfirmed(true);
     hasTriggeredAnomalyRef.current = false;
+    const initialTilt = Math.random() > 0.5 ? 17.5 : -17.5;
+    setPitchAngleDeg(initialTilt);
+    setPitchHoldProgress(0);
+    setPitchCountdown(null);
     setFlightStage('liftoff');
   };
 
@@ -610,6 +623,9 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
     setCrashReason('');
     hasTriggeredAnomalyRef.current = false;
     hasTriggeredCrashRef.current = false;
+    setPitchAngleDeg(17.5);
+    setPitchHoldProgress(0);
+    setPitchCountdown(null);
   };
 
   const handleAdjustPitch = (deltaDeg: number) => {
@@ -623,6 +639,15 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
     const mouseX = e.clientX - rect.left;
     const norm = (mouseX / rect.width) * 2 - 1; // -1 to +1
     setPitchAngleDeg(Number((norm * 22).toFixed(1)));
+  };
+
+  const handleTouchMovePitch = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!currentOperatorInfo.isMe || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const touchX = touch.clientX - rect.left;
+    const norm = (touchX / rect.width) * 2 - 1; // -1 to +1
+    setPitchAngleDeg(Number((Math.max(-1, Math.min(1, norm)) * 22).toFixed(1)));
   };
 
   const handleToggleLock = (idx: number) => {
@@ -693,17 +718,17 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
   const currentStepIdx = stageSteps.findIndex((s) => s.id === flightStage);
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#070B14] w-screen h-screen flex flex-col text-white select-none overflow-hidden font-sans">
+    <div className="fixed inset-0 z-50 bg-[#070B14]/85 w-screen h-screen flex flex-col text-white select-none overflow-hidden font-sans">
       {/* Dynamic Deep Space Cockpit Backdrops */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none opacity-40 mix-blend-screen -z-20"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none opacity-30 mix-blend-screen -z-20"
         style={{ backgroundImage: `url('./flight-kit/bg-hero-deepspace.webp')` }}
       />
       <div
         className="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none mix-blend-overlay -z-10"
         style={{ backgroundImage: `url('./flight-kit/bg-cockpit-overlay.png')` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#070B14]/80 via-transparent to-[#070B14]/95 pointer-events-none -z-10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#070B14]/60 via-transparent to-[#070B14]/90 pointer-events-none -z-10" />
 
       {/* Dynamic Red Emergency Crash Alarm Effects (Pure lightweight CSS, zero lag) */}
       {isCrashing && (
@@ -723,7 +748,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
       {/* --------------------------------------------------------------------- */}
       {/* 1. TOP GLOBAL FLIGHT BRIDGE HEADER                                   */}
       {/* --------------------------------------------------------------------- */}
-      <header className="w-full bg-[#0B0F17]/95 border-b border-white/10 px-4 md:px-8 py-2.5 flex items-center justify-between gap-3 shrink-0 backdrop-blur-md z-40">
+      <header className="w-full bg-[#070B14]/75 border-b border-white/10 px-4 md:px-8 py-2.5 flex items-center justify-between gap-3 shrink-0 backdrop-blur-md z-40">
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)] animate-pulse" />
@@ -1028,13 +1053,21 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
               </p>
             </div>
 
-            {/* Interactive Rocket Pitch Display Canvas/Box */}
+            {/* Interactive Rocket Pitch Display Canvas/Box (Mouse & Touch Enabled) */}
             <div
               onMouseMove={handleMouseMovePitch}
-              className={`relative h-64 border rounded-xl overflow-hidden bg-[#080C14] flex flex-col items-center justify-center transition-all ${
-                currentOperatorInfo.isMe ? 'cursor-ew-resize border-slate-700' : 'border-slate-800'
+              onTouchStart={handleTouchMovePitch}
+              onTouchMove={handleTouchMovePitch}
+              className={`relative h-64 border rounded-xl overflow-hidden bg-[#080C14] flex flex-col items-center justify-center transition-all touch-none select-none ${
+                currentOperatorInfo.isMe ? 'cursor-ew-resize border-sky-500/50 shadow-[inset_0_0_20px_rgba(56,189,248,0.15)]' : 'border-slate-800'
               }`}
             >
+              {/* HUD Frame Brackets */}
+              <img src="./flight-kit/hud-corner-bracket.svg" alt="" className="absolute top-2 left-2 w-4 h-4 opacity-40 pointer-events-none" />
+              <img src="./flight-kit/hud-corner-bracket.svg" alt="" className="absolute top-2 right-2 w-4 h-4 opacity-40 rotate-90 pointer-events-none" />
+              <img src="./flight-kit/hud-corner-bracket.svg" alt="" className="absolute bottom-2 left-2 w-4 h-4 opacity-40 -rotate-90 pointer-events-none" />
+              <img src="./flight-kit/hud-corner-bracket.svg" alt="" className="absolute bottom-2 right-2 w-4 h-4 opacity-40 rotate-180 pointer-events-none" />
+
               {/* Green Safe Flight Corridor Indicator (Center Area) */}
               <div className="absolute inset-y-0 w-24 bg-emerald-500/15 border-x border-emerald-500/40 flex items-center justify-center pointer-events-none">
                 <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest font-bold opacity-75">
@@ -1055,6 +1088,12 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
                 <strong className="text-sky-300 text-base font-bold tabular-nums">
                   {pitchHoldProgress}%
                 </strong>
+              </div>
+
+              {/* Aerospace Navball Indicator (Bottom-Right) */}
+              <div className="absolute bottom-3 right-3 hidden sm:flex items-center space-x-1.5 opacity-70 pointer-events-none bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-700/60">
+                <img src="./flight-kit/hud-navball.png" alt="Navball" className="w-5 h-5 object-contain" />
+                <span className="text-[9px] font-mono text-slate-300 font-bold">FD-ATT 0°</span>
               </div>
 
               {/* Rocket Model SVG with Transform Rotation */}
@@ -1097,27 +1136,31 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
               )}
             </div>
 
-            {/* Manual Left/Right Trim Buttons for Mobile or Accessibility */}
+            {/* Manual Left/Right Steering Trim Controls (Responsive Touch & Desktop) */}
             {currentOperatorInfo.isMe && (
-              <div className="flex items-center justify-center space-x-3 pt-1">
-                <button
-                  onClick={() => handleAdjustPitch(-3)}
-                  className="px-4 py-2 rounded-xl border border-slate-700 bg-[#0B0F17] hover:bg-slate-800 font-mono text-xs text-white cursor-pointer"
-                >
-                  ◀ Sol Trim (-3°)
-                </button>
-                <div className="w-48 bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1 w-full">
+                <div className="flex items-center space-x-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => handleAdjustPitch(-3)}
+                    className="flex-1 sm:flex-initial px-4 py-3 sm:py-2 rounded-xl border border-sky-500/40 bg-sky-950/40 hover:bg-sky-900/60 active:scale-95 font-mono text-xs sm:text-sm text-sky-200 cursor-pointer min-h-[44px] flex items-center justify-center space-x-1 shadow-sm"
+                  >
+                    <span>◀</span>
+                    <span>{isTr ? 'Sola Düzelt (-3°)' : 'Left Trim (-3°)'}</span>
+                  </button>
+                  <button
+                    onClick={() => handleAdjustPitch(+3)}
+                    className="flex-1 sm:flex-initial px-4 py-3 sm:py-2 rounded-xl border border-sky-500/40 bg-sky-950/40 hover:bg-sky-900/60 active:scale-95 font-mono text-xs sm:text-sm text-sky-200 cursor-pointer min-h-[44px] flex items-center justify-center space-x-1 shadow-sm"
+                  >
+                    <span>{isTr ? 'Sağa Düzelt (+3°)' : 'Right Trim (+3°)'}</span>
+                    <span>▶</span>
+                  </button>
+                </div>
+                <div className="w-full sm:w-48 bg-slate-800 h-2.5 rounded-full overflow-hidden flex-shrink-0">
                   <div
                     className="bg-sky-400 h-full transition-all duration-200 shadow-[0_0_8px_rgba(56,189,248,0.5)]"
                     style={{ width: `${pitchHoldProgress}%` }}
                   />
                 </div>
-                <button
-                  onClick={() => handleAdjustPitch(+3)}
-                  className="px-4 py-2 rounded-xl border border-slate-700 bg-[#0B0F17] hover:bg-slate-800 font-mono text-xs text-white cursor-pointer"
-                >
-                  Sağ Trim (+3°) ▶
-                </button>
               </div>
             )}
           </div>
@@ -1680,10 +1723,10 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
         {/* 10 CRITICAL IN-FLIGHT ANOMALIES MODAL OVERLAY (WITH 4 CHOICES)    */}
         {/* ================================================================= */}
         {activeAnomaly && (
-          <div className="absolute inset-0 bg-[#070B14]/90 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-            <div className="max-w-3xl w-full border border-rose-500/50 bg-[#0E1422] rounded-2xl p-6 md:p-8 space-y-6 shadow-2xl">
+          <div className="absolute inset-0 bg-[#070B14]/90 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 z-50 animate-in fade-in duration-200 overflow-y-auto">
+            <div className="max-w-3xl w-full border border-rose-500/50 bg-[#0E1422] rounded-2xl p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-2xl max-h-[92vh] overflow-y-auto my-auto">
               {/* Crisis Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-rose-500/30 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-rose-500/30 pb-3 sm:pb-4">
                 <div className="flex items-center space-x-2.5">
                   <span className="w-3 h-3 rounded-full bg-rose-500 animate-ping" />
                   <span className="font-mono text-xs font-bold text-rose-300 uppercase tracking-widest">
@@ -1693,15 +1736,15 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
 
                 <div className="flex items-center space-x-2 font-mono text-xs">
                   <span className="text-slate-400">{isTr ? 'Kalan Süre' : 'Time Remaining'}:</span>
-                  <span className="px-3 py-1 rounded-full bg-rose-500 text-white font-bold tabular-nums">
+                  <span className="px-3 py-1 rounded-full bg-rose-500 text-white font-bold tabular-nums text-sm">
                     {anomalyTimer}s
                   </span>
                 </div>
               </div>
 
               {/* Anomaly Image & Scenario Description */}
-              <div className="flex flex-col md:flex-row gap-4 items-start">
-                <div className="w-full md:w-48 h-28 rounded-xl overflow-hidden border border-rose-500/40 shrink-0 bg-[#080C14]">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start">
+                <div className="w-full sm:w-44 h-24 sm:h-28 rounded-xl overflow-hidden border border-rose-500/40 shrink-0 bg-[#080C14]">
                   <img
                     src={getAnomalyArtwork(activeAnomaly.id, activeAnomaly.type)}
                     alt={activeAnomaly.title}
@@ -1710,7 +1753,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
                 </div>
 
                 <div className="space-y-1.5 flex-1">
-                  <h3 className="font-display font-bold text-lg text-white">
+                  <h3 className="font-display font-bold text-base sm:text-lg text-white">
                     {activeAnomaly.title}
                   </h3>
                   <p className="text-xs font-mono text-slate-300 leading-relaxed">
@@ -1719,8 +1762,23 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
                 </div>
               </div>
 
+              {/* Multiplayer Consensus Vote Tracker */}
+              {isMultiplayer && (
+                <div className="p-2.5 rounded-xl border border-sky-500/30 bg-sky-950/30 font-mono text-xs flex flex-col sm:flex-row items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
+                    <span className="text-sky-300">
+                      {isTr ? 'Mürettebat Oylaması:' : 'Crew Consensus'}: <strong>{Object.keys(anomalyVotes).length} / {Math.max(1, players.length)}</strong> {isTr ? 'oylandı' : 'voted'}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400">
+                    {isTr ? 'Herkes oy verince anında uygulanır (veya 45s süre bitiminde)' : 'Applies when everyone votes or 45s timer ends'}
+                  </span>
+                </div>
+              )}
+
               {/* 4 Realistic Engineering Choices */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 {activeAnomaly.choices.map((choice, cIdx) => {
                   const votesForChoice = Object.entries(anomalyVotes).filter(([_, cId]) => cId === choice.id);
                   const myVote = anomalyVotes[myPlayerInfo.peerId] === choice.id;
@@ -1729,9 +1787,9 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
                     <button
                       key={choice.id}
                       onClick={() => voteAnomalyChoice(choice.id)}
-                      className={`text-left p-3.5 border rounded-xl flex flex-col justify-between transition-all cursor-pointer font-mono ${
+                      className={`text-left p-3 sm:p-3.5 border rounded-xl flex flex-col justify-between transition-all cursor-pointer font-mono active:scale-[0.99] touch-manipulation min-h-[64px] ${
                         myVote
-                          ? 'border-sky-400 bg-sky-500/15 shadow-md'
+                          ? 'border-sky-400 bg-sky-500/15 shadow-md ring-1 ring-sky-400/50'
                           : 'border-slate-800 bg-[#0B0F17] hover:border-slate-700'
                       }`}
                     >
@@ -1741,7 +1799,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
                             {String.fromCharCode(65 + cIdx)}) {choice.label}
                           </span>
                           {isMultiplayer && votesForChoice.length > 0 && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-sky-300">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-sky-300 font-bold">
                               {votesForChoice.length} {isTr ? 'OY' : 'VOTE'}
                             </span>
                           )}
@@ -1751,7 +1809,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
                         </p>
                       </div>
 
-                      <div className="mt-2.5 pt-2 border-t border-slate-800/80 text-[10px] text-slate-300">
+                      <div className="mt-2.5 pt-2 border-t border-slate-800/80 text-[10px] text-slate-300 font-medium">
                         {choice.effectDescription}
                       </div>
                     </button>

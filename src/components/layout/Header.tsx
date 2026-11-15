@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMultiplayer, onOpenFlightM
 
   return (
     <>
-      <header className="w-full max-w-full overflow-hidden bg-[#0B0F17]/90 backdrop-blur-md border-b border-white/10 px-2.5 sm:px-6 md:px-8 py-2 sm:py-2.5 sticky top-0 z-30">
+      <header className="w-full max-w-full overflow-hidden bg-[#070B14]/75 backdrop-blur-md border-b border-white/10 px-2.5 sm:px-6 md:px-8 py-2 sm:py-2.5 sticky top-0 z-30">
         <div className="max-w-[1360px] mx-auto flex items-center justify-between gap-1.5 sm:gap-3">
           {/* Left: Brand Logo (Interactive Home Action) */}
           <div className="flex items-center space-x-1.5 sm:space-x-3 min-w-0">

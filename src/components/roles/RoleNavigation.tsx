@@ -129,7 +129,7 @@ export const RoleNavigation: React.FC = () => {
                     : 'AI analyzes and optimizes all subsystems for nominal flight'
                 }
               >
-                <Sparkles className="w-3.5 h-3.5 text-sky-400 group-hover:rotate-12 transition-transform" />
+                <img src="./flight-kit/avatar-copilot-ai-hd.webp" alt="AI Co-Pilot" className="w-4 h-4 rounded-full object-cover border border-sky-400/50" />
                 <span>{isTr ? 'YAPAY ZEKA ASİSTANI' : 'AI FLIGHT ASSISTANT'}</span>
               </button>
             </div>
@@ -171,7 +171,7 @@ export const RoleNavigation: React.FC = () => {
                     : 'AI analyzes and optimizes all subsystems for nominal flight'
                 }
               >
-                <Sparkles className="w-3.5 h-3.5 text-sky-400 group-hover:rotate-12 transition-transform" />
+                <img src="./flight-kit/avatar-copilot-ai-hd.webp" alt="AI Co-Pilot" className="w-4 h-4 rounded-full object-cover border border-sky-400/50" />
                 <span>{isTr ? 'YAPAY ZEKA ASİSTANI' : 'AI FLIGHT ASSISTANT'}</span>
               </button>
             </div>

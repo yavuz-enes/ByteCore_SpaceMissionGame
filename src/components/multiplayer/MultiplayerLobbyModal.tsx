@@ -337,7 +337,7 @@ export const MultiplayerLobbyModal: React.FC<MultiplayerLobbyModalProps> = ({
                         >
                           <div className="flex items-center space-x-3">
                             <img
-                              src={ROLE_AVATARS[role]}
+                              src={assigned?.name.includes('Co-Pilot') ? './flight-kit/avatar-copilot-ai-hd.webp' : ROLE_AVATARS[role]}
                               alt={roleT[role].name}
                               className="w-8 h-8 rounded-full object-cover border border-white/20 shrink-0"
                             />

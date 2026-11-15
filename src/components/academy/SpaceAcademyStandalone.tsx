@@ -31,6 +31,14 @@ const MODULE_ARTWORK: Record<StandaloneModuleId, string> = {
   'subsystem-tradeoffs': './flight-kit/acad-diagram-swapc.webp',
 };
 
+const MODULE_THUMBNAILS: Record<StandaloneModuleId, string> = {
+  'delta-v': './flight-kit/module-delta-v.webp',
+  'solar-thermal': './flight-kit/module-solar-flux.webp',
+  'deep-space-comm': './flight-kit/module-dsn-comm.webp',
+  'radiation-environment': './flight-kit/module-radiation.webp',
+  'subsystem-tradeoffs': './flight-kit/module-tradeoffs.webp',
+};
+
 export const SpaceAcademyStandalone: React.FC = () => {
   const { locale, setLocale, closeAcademy, startSoloMission } = useMissionStore();
   const isTr = locale === 'tr';
@@ -168,22 +176,22 @@ export const SpaceAcademyStandalone: React.FC = () => {
   const isAllMastered = masteredModules.size === modules.length;
 
   return (
-    <div className="min-h-screen w-full max-w-full bg-[#0B0F17] text-white flex flex-col font-sans relative">
+    <div className="min-h-screen w-full max-w-full bg-transparent text-white flex flex-col font-sans relative">
       {/* Ambient Deep Space & Aerospace Hangar Artwork (Positioned safely behind all content) */}
       <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat pointer-events-none -z-20"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat pointer-events-none opacity-40 mix-blend-screen -z-20"
         style={{ backgroundImage: `url('./flight-kit/bg-hero-deepspace.webp')` }}
       />
       <div
         className="fixed inset-0 bg-cover bg-center opacity-25 pointer-events-none mix-blend-screen -z-10"
         style={{ backgroundImage: `url('./flight-kit/bg-academy-hangar.webp')` }}
       />
-      <div className="fixed inset-0 bg-[#0B0F17]/35 pointer-events-none -z-10" />
+      <div className="fixed inset-0 bg-[#070B14]/40 pointer-events-none -z-10" />
 
       {/* --------------------------------------------------------------------- */}
       {/* TOP HEADER: GLOBAL NAVIGATION BAR (MATCHES LANDING PAGE)              */}
       {/* --------------------------------------------------------------------- */}
-      <header className="sticky top-0 z-40 w-full bg-[#0B0F17]/90 border-b border-white/10 backdrop-blur-md px-4 md:px-8 py-3.5">
+      <header className="sticky top-0 z-40 w-full bg-[#070B14]/75 border-b border-white/10 backdrop-blur-md px-4 md:px-8 py-3.5">
         <div className="max-w-[1360px] mx-auto flex items-center justify-between gap-4">
           {/* Brand */}
           <button
@@ -271,7 +279,7 @@ export const SpaceAcademyStandalone: React.FC = () => {
                 <button
                   key={mod.id}
                   onClick={() => setActiveModuleId(mod.id)}
-                  className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                  className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
                     isActive
                       ? 'border-sky-400 bg-sky-500/15 shadow-md shadow-sky-500/10'
                       : isMastered
@@ -279,22 +287,23 @@ export const SpaceAcademyStandalone: React.FC = () => {
                       : 'border-slate-800 bg-[#0E1422] hover:border-slate-700'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <ModIcon className={`w-4 h-4 ${isActive ? 'text-sky-300' : isMastered ? 'text-emerald-400' : 'text-slate-400'}`} />
-                      <span className="text-[10px] font-mono text-slate-400 uppercase font-bold">
-                        {mod.index}
-                      </span>
-                    </div>
+                  <div className="relative w-full h-12 rounded-xl overflow-hidden border border-white/10 bg-[#080C14]">
+                    <img src={MODULE_THUMBNAILS[mod.id]} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-transparent to-transparent" />
+                    <span className="absolute top-1 left-1.5 text-[9px] font-mono font-bold text-sky-300">
+                      {mod.index}
+                    </span>
                     {isMastered && (
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="absolute top-1 right-1.5 p-0.5 rounded-full bg-emerald-500/80 text-white">
+                        <Check className="w-2.5 h-2.5" />
+                      </span>
                     )}
                   </div>
 
-                    <div>
-                      <h4 className="text-xs font-display font-bold text-white line-clamp-1">
-                        {mod.title}
-                      </h4>
+                  <div>
+                    <h4 className="text-xs font-display font-bold text-white line-clamp-1">
+                      {mod.title}
+                    </h4>
                       <span className="text-[10px] font-mono text-slate-400 block truncate mt-0.5">
                         {mod.category}
                       </span>

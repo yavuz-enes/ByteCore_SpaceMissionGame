@@ -140,14 +140,14 @@ export const LandingPage: React.FC = () => {
   const hasTwoPlayers = players.length >= 2;
 
   return (
-    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#0B0F17] text-white flex flex-col font-sans selection:bg-sky-500/20 selection:text-white relative">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-transparent text-white flex flex-col font-sans selection:bg-sky-500/20 selection:text-white relative">
       {/* Global Ambient Deep Space Atmosphere & Cockpit Layers (strictly behind content) */}
       <div
-        className="fixed inset-0 pointer-events-none -z-20 bg-cover bg-center bg-no-repeat"
+        className="fixed inset-0 pointer-events-none -z-20 bg-cover bg-center bg-no-repeat opacity-40 mix-blend-screen"
         style={{ backgroundImage: `url('./flight-kit/bg-hero-deepspace.webp')` }}
       />
       <div
-        className="fixed inset-0 pointer-events-none -z-10 bg-[#0B0F17]/25"
+        className="fixed inset-0 pointer-events-none -z-10 bg-[#070B14]/40"
       />
       <div
         className="fixed inset-0 pointer-events-none -z-10 opacity-15"
@@ -160,7 +160,7 @@ export const LandingPage: React.FC = () => {
       {/* ------------------------------------------------------------------------- */}
       {/* 1. TOP GLOBAL NAVIGATION BAR */}
       {/* ------------------------------------------------------------------------- */}
-      <header className="sticky top-0 z-40 w-full bg-[#0B0F17]/90 border-b border-white/10 backdrop-blur-md px-4 md:px-8 py-3.5">
+      <header className="sticky top-0 z-40 w-full bg-[#070B14]/75 border-b border-white/10 backdrop-blur-md px-4 md:px-8 py-3.5">
         <div className="max-w-[1360px] mx-auto flex items-center justify-between gap-4">
           {/* Brand */}
           <a

@@ -294,6 +294,7 @@ export const CommsConsole: React.FC = () => {
       >
         <div className="flex items-center justify-between pb-2 border-b border-white/10">
           <div className="flex items-center space-x-2">
+            <img src="./flight-kit/hud-frequency-wave.svg" alt="" className="w-5 h-5 opacity-70" />
             {isBottlenecked && <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />}
             <span className={`font-bold uppercase tracking-wider ${isBottlenecked ? 'text-rose-400' : 'text-white'}`}>
               {t.throughputComparison} {isBottlenecked && (isTr ? '(KRİTİK HATA)' : '(CRITICAL ERROR)')}

@@ -7,7 +7,7 @@ export const MISSION_ANOMALIES_EN: MissionAnomaly[] = [
     type: 'electrical-harness-rupture',
     title: 'POWER BUS ALERT: ELECTRICAL HARNESS RUPTURE & ARC FAULT',
     description: 'Severe launch vibration or low power thermal cycling caused the primary wire harness insulation to fray. Arc discharge detected across main power distribution buses.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'low-power-or-vibration',
     choices: [
       {
@@ -57,7 +57,7 @@ export const MISSION_ANOMALIES_EN: MissionAnomaly[] = [
     type: 'solar-storm',
     title: 'CRITICAL TELEMETRY: CLASS-X SOLAR PARTICLE EVENT (SPE)',
     description: 'A coronal mass ejection has generated an intense proton radiation wave impacting the spacecraft. Star trackers are blinding and avionics buses are sustaining energetic ion strikes.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'high-radiation',
     choices: [
       {
@@ -107,7 +107,7 @@ export const MISSION_ANOMALIES_EN: MissionAnomaly[] = [
     type: 'reaction-wheel',
     title: 'ATTITUDE CONTROLLER: REACTION WHEEL MOMENTUM SATURATION',
     description: 'Reaction Wheel #3 bearing friction has spiked to 6,200 RPM, reaching maximum momentum saturation. Spacecraft is drifting off its nominal orbital vector.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     choices: [
       {
         id: 'wheel-rcs-dump',
@@ -156,7 +156,7 @@ export const MISSION_ANOMALIES_EN: MissionAnomaly[] = [
     type: 'battery-thermal-runaway',
     title: 'ENERGY STORAGE HAZARD: LI-ION BATTERY THERMAL RUNAWAY',
     description: 'Internal cell short circuit in Battery Bank B triggered rapid exothermic thermal runaway. Core temperature is surging past +82°C with outgassing risk.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'tvac-or-thermal',
     choices: [
       {
@@ -206,7 +206,7 @@ export const MISSION_ANOMALIES_EN: MissionAnomaly[] = [
     type: 'micrometeoroid-puncture',
     title: 'HULL INTEGRITY COMPROMISE: MICROMETEOROID PUNCTURE',
     description: 'High-velocity cosmic dust impact punctured external Whipple shield and pierced nitrogen pressurization line. Bus pressure dropping at 18 kPa/min.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'asteroid-or-deep-space',
     choices: [
       {
@@ -256,7 +256,7 @@ export const MISSION_ANOMALIES_EN: MissionAnomaly[] = [
     type: 'dsn-carrier-slip',
     title: 'DEEP SPACE LINK DEGRADATION: DSN CARRIER PHASE SLIP',
     description: 'Interplanetary plasma scintillation and high Doppler shift caused Deep Space Network 34m dish to lose phase-lock on 8.4 GHz X-Band carrier wave.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'comm-distance',
     choices: [
       {
@@ -306,7 +306,7 @@ export const MISSION_ANOMALIES_EN: MissionAnomaly[] = [
     type: 'solar-array-misalignment',
     title: 'MECHANICAL FAULT: SOLAR ARRAY STEPPER MOTOR JAM',
     description: 'Primary solar array drive mechanism jammed at a 42° off-nominal sun angle. Photovoltaic power output dropped by 45%, draining backup batteries.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'solar-array-angle',
     choices: [
       {
@@ -356,7 +356,7 @@ export const MISSION_ANOMALIES_EN: MissionAnomaly[] = [
     type: 'star-tracker-loss',
     title: 'OPTICAL NAVIGATION: STAR TRACKER SENSOR BLINDING',
     description: 'Direct solar specular reflection off multilayer insulation has saturated Star Tracker #1 optics. 3-axis inertial quaternion precision degraded to sub-optimal.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     choices: [
       {
         id: 'tracker-imu-fallback',
@@ -405,7 +405,7 @@ export const MISSION_ANOMALIES_EN: MissionAnomaly[] = [
     type: 'propellant-cavitation',
     title: 'FEED SYSTEM ALERT: PROPELLANT CAVITATION & PRESSURE DROP',
     description: 'Helium pressurization valve chattering caused micro-bubbles in main fuel feedline. Turbopump inlet pressure dropped below critical vapor threshold.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'low-deltav-margin',
     choices: [
       {
@@ -455,7 +455,7 @@ export const MISSION_ANOMALIES_EN: MissionAnomaly[] = [
     type: 'cosmic-ray-upset',
     title: 'AVIONICS ALERT: COSMIC RAY SINGLE-EVENT UPSET (BIT FLIP)',
     description: 'Energetic heavy ion passed through primary SRAM memory in Flight Computer 1, flipping guidance register bits and causing orbital desync error.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'high-radiation',
     choices: [
       {
@@ -508,7 +508,7 @@ export const MISSION_ANOMALIES_TR: MissionAnomaly[] = [
     type: 'electrical-harness-rupture',
     title: 'GÜÇ HATTI KRİZİ: ELEKTRİK KABLO DEMETİ YIRTILMASI & KISA DEVRE',
     description: 'Şiddetli fırlatma titreşimi veya düşük güç termal döngüsü sebebiyle ana kablo demeti yalıtımı yırtıldı. Ana güç dağıtım hattında ark boşalması ve voltaj dalgalanması tespit edildi.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'low-power-or-vibration',
     choices: [
       {
@@ -558,7 +558,7 @@ export const MISSION_ANOMALIES_TR: MissionAnomaly[] = [
     type: 'solar-storm',
     title: 'RADYASYON ALARMI: X-SINIFI GÜNEŞ PARÇACIK OLAYI (SPE)',
     description: 'Güneş koronal kütle atımı sonucu uzay aracına doğru şiddetli bir proton ve iyon dalgası ilerliyor. Yıldız takipçileri körleşiyor ve aviyonik hatlar enerji yüklü parçacık bombardımanı altında.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'high-radiation',
     choices: [
       {
@@ -608,7 +608,7 @@ export const MISSION_ANOMALIES_TR: MissionAnomaly[] = [
     type: 'reaction-wheel',
     title: 'YÖNELİM KONTROLÜ: REAKSİYON TEKERİ MOMENTUM DOYUMU',
     description: '3 Numaralı reaksiyon tekeri rulman sürtünmesi 6.200 RPM e fırlayarak azami doyum noktasına ulaştı. Araç nominal yörünge ekseninden sağa doğru sapıyor.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     choices: [
       {
         id: 'wheel-rcs-dump',
@@ -657,7 +657,7 @@ export const MISSION_ANOMALIES_TR: MissionAnomaly[] = [
     type: 'battery-thermal-runaway',
     title: 'GÜÇ DEPOLAMA ALARMI: LİTYUM-İYON BATARYA TERMAL KAÇAĞI',
     description: 'Batarya Bank B deki dahili hücre kısa devresi hızlı ekzotermik ısınmaya yol açtı. Çekirdek sıcaklığı +82°C yi aştı ve patlama riski taşıyor.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'tvac-or-thermal',
     choices: [
       {
@@ -707,7 +707,7 @@ export const MISSION_ANOMALIES_TR: MissionAnomaly[] = [
     type: 'micrometeoroid-puncture',
     title: 'GÖVDE BÜTÜNLÜĞÜ: MİKROMETEOROİD DELİNMESİ & BASINÇ KAYBI',
     description: 'Yüksek hızlı kozmik parçacık harici kalkanı delip aviyonik bölmesindeki azot basınç hattına zarar verdi. Gövde basıncı dakikada 18 kPa hızla düşüyor.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'asteroid-or-deep-space',
     choices: [
       {
@@ -757,7 +757,7 @@ export const MISSION_ANOMALIES_TR: MissionAnomaly[] = [
     type: 'dsn-carrier-slip',
     title: 'DERİN UZAY İLETİŞİMİ: DSN TAŞIYICI SİNYAL VE FAZ KAYMASI',
     description: 'Gezegenler arası plazma dalgalanması ve yüksek Doppler etkisi sebebiyle Deep Space Network 34m çanağı 8.4 GHz X-Bandı taşıyıcı sinyal kilidini kaybetti.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'comm-distance',
     choices: [
       {
@@ -807,7 +807,7 @@ export const MISSION_ANOMALIES_TR: MissionAnomaly[] = [
     type: 'solar-array-misalignment',
     title: 'MEKANİK ARIZA: GÜNEŞ PANELİ STEP MOTORU SIKIŞMASI',
     description: 'Birincil güneş paneli tahrik mekanizması 42° lik sapma açısında sıkıştı. Güneş ışığı üretim verimi %45 azaldı ve bataryalar boşalmaya başladı.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'solar-array-angle',
     choices: [
       {
@@ -857,7 +857,7 @@ export const MISSION_ANOMALIES_TR: MissionAnomaly[] = [
     type: 'star-tracker-loss',
     title: 'OPTİK NAVİGASYON: YILDIZ TAKİPÇİSİ IŞIK KÖRLÜĞÜ',
     description: 'Yalıtım battaniyesinden yansıyan direkt güneş ışığı 1 Numaralı yıldız takipçisi optiğini körleştirdi. 3 eksenli konum kuaterniyonu hassasiyetini kaybetti.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     choices: [
       {
         id: 'tracker-imu-fallback',
@@ -906,7 +906,7 @@ export const MISSION_ANOMALIES_TR: MissionAnomaly[] = [
     type: 'propellant-cavitation',
     title: 'YAKIT HATTI KRİZİ: PROPELANT KAVİTASYONU & BASINÇ DÜŞÜŞÜ',
     description: 'Helyum basınçlama regülatöründeki titreşim yakıt besleme hattında mikro kabarcıklanmaya yol açtı. Turbopompa giriş basıncı kritik buharlaşma sınırının altına indi.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'low-deltav-margin',
     choices: [
       {
@@ -956,7 +956,7 @@ export const MISSION_ANOMALIES_TR: MissionAnomaly[] = [
     type: 'cosmic-ray-upset',
     title: 'AVİYONİK BİLGİSAYAR: KOZMİK IŞIN TEK OLAY DEĞİŞİMİ (BIT FLIP)',
     description: 'Yüksek enerjili ağır bir iyon Uçuş Bilgisayarı 1 in ana SRAM belleğinden geçerek yörünge yazılımındaki bir biti değiştirdi. Yörünge kuaterniyonunda desenkronizasyon oluştu.',
-    urgencySeconds: 15,
+    urgencySeconds: 45,
     triggerCondition: 'high-radiation',
     choices: [
       {

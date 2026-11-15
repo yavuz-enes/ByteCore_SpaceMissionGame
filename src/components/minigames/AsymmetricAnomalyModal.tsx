@@ -16,17 +16,17 @@ export const AsymmetricAnomalyModal: React.FC = () => {
   const isTr = locale === 'tr';
   const [enteredCode, setEnteredCode] = useState('');
   const [errorShake, setErrorShake] = useState(false);
-  const [countdown, setCountdown] = useState(20);
+  const [countdown, setCountdown] = useState(45);
   const [radioSent, setRadioSent] = useState(false);
 
   useEffect(() => {
     if (!asymmetricAnomaly) {
-      setCountdown(20);
+      setCountdown(45);
       setEnteredCode('');
       return;
     }
 
-    setCountdown(asymmetricAnomaly.timeRemaining || 20);
+    setCountdown(asymmetricAnomaly.timeRemaining || 45);
     const interval = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {

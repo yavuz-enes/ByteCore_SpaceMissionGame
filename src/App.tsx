@@ -17,6 +17,7 @@ import { AssistanceNotification } from './components/minigames/AssistanceNotific
 import { AsymmetricAnomalyModal } from './components/minigames/AsymmetricAnomalyModal';
 import { LaunchConsensusModal } from './components/multiplayer/LaunchConsensusModal';
 import { SpaceAcademyStandalone } from './components/academy/SpaceAcademyStandalone';
+import { StarfieldBackground } from './components/layout/StarfieldBackground';
 import { TRANSLATIONS } from './i18n/translations';
 
 export const App: React.FC = () => {
@@ -41,7 +42,8 @@ export const App: React.FC = () => {
   // If in Academy view, render the dedicated Space Academy Campus
   if (currentView === 'academy') {
     return (
-      <div className="w-full max-w-full overflow-x-hidden min-h-screen bg-[#0B0F17]">
+      <div className="w-full max-w-full overflow-x-hidden min-h-screen bg-transparent relative">
+        <StarfieldBackground />
         <SpaceAcademyStandalone />
       </div>
     );
@@ -50,7 +52,8 @@ export const App: React.FC = () => {
   // If in Landing Gateway view, render Landing Page + Consensus Modal
   if (currentView === 'landing') {
     return (
-      <div className="w-full max-w-full overflow-x-hidden">
+      <div className="w-full max-w-full overflow-x-hidden min-h-screen bg-transparent relative">
+        <StarfieldBackground />
         <LandingPage />
         <LaunchConsensusModal />
       </div>
@@ -58,19 +61,20 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#0B0F17] text-white flex flex-col font-sans relative">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-transparent text-white flex flex-col font-sans relative">
+      <StarfieldBackground />
       {/* Ambient Deep Space, Cockpit Canopy & Space Grid Overlays (strictly behind content) */}
       <div
-        className="fixed inset-0 pointer-events-none -z-20 bg-cover bg-center bg-no-repeat"
+        className="fixed inset-0 pointer-events-none -z-20 bg-cover bg-center bg-no-repeat opacity-40 mix-blend-screen"
         style={{ backgroundImage: `url('./flight-kit/bg-hero-deepspace.webp')` }}
       />
-      <div className="fixed inset-0 pointer-events-none -z-10 bg-[#0B0F17]/35" />
+      <div className="fixed inset-0 pointer-events-none -z-10 bg-[#070B14]/45" />
       <div
         className="fixed inset-0 pointer-events-none -z-10 opacity-15"
         style={{ backgroundImage: `url('./flight-kit/orbital-grid-pattern.svg')`, backgroundSize: '320px' }}
       />
       <div
-        className="fixed inset-0 pointer-events-none -z-10 bg-cover bg-center opacity-25 mix-blend-screen"
+        className="fixed inset-0 pointer-events-none -z-10 bg-cover bg-center opacity-20 mix-blend-screen"
         style={{ backgroundImage: `url('./flight-kit/bg-cockpit-overlay.png')` }}
       />
 
