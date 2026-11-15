@@ -34,15 +34,15 @@
         },
         {
           "name": "Enes Kalmaz",
-          "role": "Systems Engineer",
-          "callsign": "ENG",
-          "bio": "Subsystems & Orbital Dynamics"
+          "role": "Physics & Systems Calculation",
+          "callsign": "PHYSICS",
+          "bio": "Rocket dynamics, orbital transfer equations, and qualification testing."
         },
         {
           "name": "Taner Birtek",
-          "role": "Mission Engineer",
-          "callsign": "OPS",
-          "bio": "Mission Control & Simulation"
+          "role": "Research & Documentation",
+          "callsign": "RESEARCH",
+          "bio": "NASA scientific data research, mission scenario design, and documentation."
         }
       ]
     },
@@ -186,15 +186,15 @@
         },
         {
           "name": "Enes Kalmaz",
-          "role": "Sistem Mühendisi",
-          "callsign": "SİSTEM",
-          "bio": "Alt Sistemler & Yörünge Dinamiği"
+          "role": "Fizik & Sistem Hesaplama",
+          "callsign": "FİZİK",
+          "bio": "Roket fiziği, yörünge transfer denklemleri ve sistem yeterlilik testleri."
         },
         {
           "name": "Taner Birtek",
-          "role": "Görev Mühendisi",
-          "callsign": "GÖREV",
-          "bio": "Görev Kontrol & Simülasyon"
+          "role": "Araştırma & Dokümantasyon",
+          "callsign": "ARAŞTIRMA",
+          "bio": "NASA kaynak araştırmaları, görev senaryoları ve proje sunum/metin hazırlığı."
         }
       ]
     },
