@@ -118,7 +118,7 @@ export const EngineerConsole: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/20 to-transparent" />
               <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-black/75 border border-white/20 text-sky-300">
-                AEROSPACE RIG
+                {isTr ? 'HAVACILIK TESTİ' : 'AEROSPACE RIG'}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -127,10 +127,12 @@ export const EngineerConsole: React.FC = () => {
               </span>
               {environmentalTests.vibrationTested ? (
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${environmentalTests.vibrationPassed ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300' : 'bg-rose-500/15 border border-rose-500/30 text-rose-300'}`}>
-                  {environmentalTests.vibrationPassed ? `PASS (${environmentalTests.vibrationScore}%)` : `FAIL (${environmentalTests.vibrationScore}%)`}
+                  {environmentalTests.vibrationPassed
+                    ? (isTr ? `GEÇTİ (%${environmentalTests.vibrationScore})` : `PASS (${environmentalTests.vibrationScore}%)`)
+                    : (isTr ? `KALDI (%${environmentalTests.vibrationScore})` : `FAIL (${environmentalTests.vibrationScore}%)`)}
                 </span>
               ) : (
-                <span className="text-[10px] text-slate-500">PENDING</span>
+                <span className="text-[10px] text-slate-500">{isTr ? 'BEKLİYOR' : 'PENDING'}</span>
               )}
             </div>
             <div className="flex items-center justify-between pt-1">
@@ -158,7 +160,7 @@ export const EngineerConsole: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F17] via-[#0B0F17]/20 to-transparent" />
               <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-black/75 border border-white/20 text-purple-300">
-                CRYO VACUUM
+                {isTr ? 'TERMAL VAKUM' : 'CRYO VACUUM'}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -167,10 +169,12 @@ export const EngineerConsole: React.FC = () => {
               </span>
               {environmentalTests.tvacTested ? (
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${environmentalTests.tvacPassed ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300' : 'bg-rose-500/15 border border-rose-500/30 text-rose-300'}`}>
-                  {environmentalTests.tvacPassed ? `PASS (${environmentalTests.tvacScore}%)` : `FAIL (${environmentalTests.tvacScore}%)`}
+                  {environmentalTests.tvacPassed
+                    ? (isTr ? `GEÇTİ (%${environmentalTests.tvacScore})` : `PASS (${environmentalTests.tvacScore}%)`)
+                    : (isTr ? `KALDI (%${environmentalTests.tvacScore})` : `FAIL (${environmentalTests.tvacScore}%)`)}
                 </span>
               ) : (
-                <span className="text-[10px] text-slate-500">PENDING</span>
+                <span className="text-[10px] text-slate-500">{isTr ? 'BEKLİYOR' : 'PENDING'}</span>
               )}
             </div>
             <div className="flex items-center justify-between pt-1">

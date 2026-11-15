@@ -32,6 +32,7 @@ import { useMissionStore } from '../../store/missionStore';
 import { useSiteContent } from '../../hooks/useSiteContent';
 import { MissionId, PlayerRole } from '../../types/mission';
 import { multiplayerService } from '../../services/multiplayerService';
+import { TARGET_TRANSLATIONS } from '../../i18n/missionsLocale';
 
 const DESTINATION_ARTWORK: Record<string, string> = {
   'lunar-recon': './flight-kit/scenario-moon-shackleton.webp',
@@ -261,7 +262,7 @@ export const LandingPage: React.FC = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
                 <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/75 backdrop-blur-md border border-white/20 text-sky-300">
-                  SOLO MODE
+                  {isTr ? 'TEK OYUNCULU' : 'SOLO MODE'}
                 </span>
               </div>
               <div className="p-4 space-y-1.5 flex-1 flex flex-col justify-between">
@@ -295,7 +296,7 @@ export const LandingPage: React.FC = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
                 <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/75 backdrop-blur-md border border-white/20 text-purple-300">
-                  CO-OP MULTIPLAYER
+                  {isTr ? 'ÇOK OYUNCULU' : 'CO-OP MULTIPLAYER'}
                 </span>
               </div>
               <div className="p-4 space-y-1.5 flex-1 flex flex-col justify-between">
@@ -329,7 +330,7 @@ export const LandingPage: React.FC = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
                 <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/75 backdrop-blur-md border border-white/20 text-emerald-300">
-                  NASA ACADEMY
+                  {isTr ? 'UZAY AKADEMİSİ' : 'NASA ACADEMY'}
                 </span>
               </div>
               <div className="p-4 space-y-1.5 flex-1 flex flex-col justify-between">
@@ -449,7 +450,7 @@ export const LandingPage: React.FC = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#0E1422] via-[#0E1422]/20 to-transparent" />
                         <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/70 backdrop-blur-md border border-white/20 text-white tracking-wider">
-                          {dest.target.toUpperCase()}
+                          {(TARGET_TRANSLATIONS[locale]?.[dest.target] || dest.target).toUpperCase()}
                         </span>
                       </div>
 

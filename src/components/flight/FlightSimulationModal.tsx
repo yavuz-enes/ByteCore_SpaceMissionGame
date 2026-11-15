@@ -1033,7 +1033,7 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
                 </h2>
               </div>
               <span className="px-3 py-1 rounded-full text-xs font-mono border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 font-bold self-start sm:self-auto">
-                NASA-STD-7001B CERTIFIED
+                {isTr ? 'NASA-STD-7001B ONAYLI' : 'NASA-STD-7001B CERTIFIED'}
               </span>
             </div>
 
@@ -1247,20 +1247,20 @@ export const FlightSimulationModal: React.FC<FlightSimulationModalProps> = ({
               {/* Green Safe Flight Corridor Indicator (Center Area) */}
               <div className="absolute inset-y-0 w-24 bg-emerald-500/15 border-x border-emerald-500/40 flex items-center justify-center pointer-events-none">
                 <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest font-bold opacity-75">
-                  KORİDOR (±5°)
+                  {isTr ? 'KORİDOR (±5°)' : 'CORRIDOR (±5°)'}
                 </span>
               </div>
 
               {/* Angle Readout Overlay */}
               <div className="absolute top-3 left-4 font-mono text-xs text-left">
-                <span className="text-slate-500 text-[10px] block">AÇI SAPMASI (PITCH)</span>
+                <span className="text-slate-500 text-[10px] block">{isTr ? 'AÇI SAPMASI (PITCH)' : 'ATTITUDE (PITCH)'}</span>
                 <strong className={`text-base font-bold tabular-nums ${Math.abs(pitchAngleDeg) <= 5.5 ? 'text-emerald-400' : 'text-rose-400'}`}>
                   {pitchAngleDeg > 0 ? `+${pitchAngleDeg}°` : `${pitchAngleDeg}°`}
                 </strong>
               </div>
 
               <div className="absolute top-3 right-4 font-mono text-xs text-right">
-                <span className="text-slate-500 text-[10px] block">KİLİT İLERLEMESİ</span>
+                <span className="text-slate-500 text-[10px] block">{isTr ? 'KİLİT İLERLEMESİ' : 'CORRIDOR HOLD'}</span>
                 <strong className="text-sky-300 text-base font-bold tabular-nums">
                   {pitchHoldProgress}%
                 </strong>

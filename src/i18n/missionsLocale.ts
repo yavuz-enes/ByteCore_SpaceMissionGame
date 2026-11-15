@@ -35,7 +35,7 @@ export const TARGET_TRANSLATIONS: Record<Locale, Record<string, string>> = {
   tr: {
     'Moon': 'Ay',
     'Mars': 'Mars',
-    'Europa': 'Europa (Jüpiter Uydusu)',
+    'Europa': 'Europa',
     'Asteroid': 'Asteroit',
     'Earth Orbit': 'Dünya Yörüngesi',
   },
